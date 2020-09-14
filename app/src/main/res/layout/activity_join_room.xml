@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.JoinRoomActivity">
+
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="15dp"
+        android:padding="5dp"
+        android:src="@mipmap/ic_back"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/select_join"/>
+
+
+    <RelativeLayout
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_below="@+id/title"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/edittext_bg"
+            android:layout_width="157dp"
+            android:layout_height="20dp" />
+
+        <TextView
+            android:text="@string/name"
+            android:textColor="#212324"
+            android:layout_above="@+id/editText"
+            android:layout_alignLeft="@+id/editText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:textColor="#212324"
+            android:layout_below="@+id/editText"
+            android:layout_alignLeft="@+id/editText_sub"
+            android:layout_marginTop="10dp"
+            android:text="@string/room_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/editText_sub"
+            android:layout_below="@+id/subtitle"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/edittext_bg"
+            android:layout_width="157dp"
+            android:layout_height="20dp" />
+
+
+        <Button
+            android:id="@+id/btn_deal"
+            android:layout_below="@+id/editText_sub"
+            android:layout_marginTop="30dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="157dp"
+            android:layout_height="20dp"
+            android:text="@string/select_join"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_select"
+            android:enabled="false"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
