@@ -1,5 +1,6 @@
 package com.herewhite.demo;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -35,7 +36,7 @@ public class DemoAPI {
     /**
      * 请在 https://console.herewhite.com 中注册";
      */
-    private static final String sdkToken = "请在 https://console.herewhite.com 中注册";
+    private static String sdkToken = "请在 https://console.herewhite.com 中注册";
 
     private static final String host = "https://cloudcapiv4.herewhite.com";
 
@@ -48,7 +49,11 @@ public class DemoAPI {
     private String demoRoomToken = "WHITEcGFydG5lcl9pZD1ZSEpVMmoxVXAyUzdoQTluV3dvaVlSRVZ3MlI5M21ibmV6OXcmc2lnPWJkODdlOGFkZDcwZmEzN2YzNWQ3OTAyYmViMWFlMDk2YjQ1ZWI0MmM6YWRtaW5JZD02Njcmcm9vbUlkPWRhZWY2MGI1ODRlYTQ4OTJhMzgxYzQxMGFlMTVmZTI4JnRlYW1JZD03OTImcm9sZT1yb29tJmV4cGlyZV90aW1lPTE2MTIwMzU1MTgmYWs9WUhKVTJqMVVwMlM3aEE5bld3b2lZUkVWdzJSOTNtYm5lejl3JmNyZWF0ZV90aW1lPTE1ODA0Nzg1NjYmbm9uY2U9MTU4MDQ3ODU2NTczODAw";
     private static DemoAPI mApi;
 
-    private DemoAPI() {}
+    private DemoAPI() {
+        if (!TextUtils.isEmpty(BuildConfig.sdkTokenByEnv)) {
+            sdkToken = BuildConfig.sdkTokenByEnv;
+        }
+    }
 
     public static DemoAPI get() {
         if (mApi == null) {
@@ -69,7 +74,10 @@ public class DemoAPI {
     private Gson gson = new Gson();
 
     boolean hasDemoInfo() {
-        return demoUUID.length() > 0 && demoRoomToken.length() > 0;
+        if (TextUtils.isEmpty(BuildConfig.sdkTokenByEnv)) {
+            return demoUUID.length() > 0 && demoRoomToken.length() > 0;
+        }
+        return false;
     }
 
     public boolean validateToken() {

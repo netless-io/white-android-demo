@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+
+
 android {
     compileSdkVersion 28
     buildToolsVersion "28.0.2"
@@ -9,6 +11,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "sdkTokenByEnv", getEnvSdkToken()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             //'armeabi-v7a', "armeabi", "x86",
@@ -30,6 +33,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+}
+/*
+*  从环境变量获取sdkToken;
+* */
+String getEnvSdkToken() {
+    def sdkTokenByEnv = System.getenv("sdkTokenByEnv") as String?: ""
+    println("sdkTokenByEnv:" + sdkTokenByEnv)
+    return "\"" + sdkTokenByEnv + "\"";
 }
 
 dependencies {
