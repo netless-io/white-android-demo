@@ -35,7 +35,7 @@ public class DemoAPI {
     /**
      * 请在 https://console.herewhite.com 中注册";
      */
-    private static final String sdkToken = "NETLESSSDK_YWs9UWl6X3dmb0xEUTdRMjI5MiZub25jZT0xNTk5NDkzMTA0MjQ5MDAmcm9sZT0wJnNpZz02ZWM0NDljNTg0MTlhM2MzYWM2MTQ5NWU2NmM2MTExMTcwMDM4YjllYzhiOTcxNDk3YWJjMDU1MDEyNDdkYzJi";
+    private static final String sdkToken = "请在 https://console.herewhite.com 中注册";
 
     private static final String host = "https://cloudcapiv4.herewhite.com";
 
