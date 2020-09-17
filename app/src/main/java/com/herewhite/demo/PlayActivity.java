@@ -47,7 +47,7 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
     @Nullable
     protected Player mPlaybackPlayer;
     Gson gson = new Gson();
-    private DemoAPI demoAPI = new DemoAPI();
+    private DemoAPI demoAPI = DemoAPI.get();
     protected boolean mUserIsSeeking;
     protected SeekBar mSeekBar;
     @Nullable

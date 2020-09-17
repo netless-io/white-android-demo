@@ -1,6 +1,7 @@
-package com.herewhite.demo;
+package com.herewhite.demo.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,13 +12,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
 import com.google.gson.Gson;
+import com.herewhite.demo.DemoAPI;
+import com.herewhite.demo.LocalFileWebViewClient;
+import com.herewhite.demo.R;
+import com.herewhite.demo.WhiteWebViewClient;
+import com.herewhite.demo.utils.SelectUtil;
 import com.herewhite.sdk.CommonCallbacks;
 import com.herewhite.sdk.domain.AnimationMode;
 import com.herewhite.sdk.domain.Scene;
@@ -59,11 +70,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 
 import wendu.dsbridge.DWebView;
 
-public class RoomActivity extends AppCompatActivity {
-
+public class WhiteRoomActivity extends Activity implements View.OnClickListener {
+    private static final String TAG = "WhiteRoomActivity";
     /** 和 iOS 名字一致 */
     final String EVENT_NAME = "WhiteCommandCustomEvent";
 
@@ -75,9 +87,16 @@ public class RoomActivity extends AppCompatActivity {
 
     private String uuid;
     private String roomToken;
+    private boolean mIsFollow = false;
 
-    WhiteboardView whiteboardView;
-    Room room;
+    private WhiteboardView whiteboardView;
+    private Room room;
+
+    private View mTopbar_ColorSelect;
+    private TextView mTopbar_scaling;
+    private TextView mTopbar_pages;
+    private View mBottomBar;
+    private View mBottomIcon;
 
     /**
      * 自定义 GlobalState 示例
@@ -105,7 +124,7 @@ public class RoomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_room);
+        setContentView(R.layout.activity_white_room);
 
         whiteboardView = findViewById(R.id.white);
         DWebView.setWebContentsDebuggingEnabled(true);
@@ -120,15 +139,60 @@ public class RoomActivity extends AppCompatActivity {
         LocalFileWebViewClient client = new LocalFileWebViewClient();
         client.setPptDirectory(getCacheDir().getAbsolutePath());
         whiteboardView.setWebViewClient(client);
-
+        initView();
         Intent intent = getIntent();
-        String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
+        String uuid = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE);
 
         if (uuid == null) {
             createRoom();
         } else {
             getRoomToken(uuid);
         }
+    }
+
+    private void initView() {
+        setListener(R.id.topbar_revoke);
+        setListener(R.id.topbar_cancelrevoke);
+        setListener(R.id.topbar_location);
+        mTopbar_ColorSelect = setListener(R.id.topbar_color);
+        mTopbar_scaling = findViewById(R.id.topbar_scaling);
+        setListener(R.id.topbar_preview);
+        setListener(R.id.topbar_first);
+        setListener(R.id.topbar_previous);
+        mTopbar_pages = findViewById(R.id.topbar_pages);
+        setListener(R.id.topbar_next);
+        setListener(R.id.topbar_last);
+        setListener(R.id.topbar_follow);
+        setListener(R.id.topbar_folder);
+        setListener(R.id.topbar_share);
+        setListener(R.id.topbar_exit);
+
+        setListener(R.id.bottombar_1);
+        setListener(R.id.bottombar_2);
+        setListener(R.id.bottombar_3);
+        setListener(R.id.bottombar_4);
+        setListener(R.id.bottombar_5);
+        setListener(R.id.bottombar_6);
+        setListener(R.id.bottombar_7);
+        setListener(R.id.bottombar_8);
+        setListener(R.id.bottombar_9);
+        setListener(R.id.bottombar_10);
+
+        setListener(R.id.bottombar_icon);
+        mBottomBar = findViewById(R.id.bottom_bar);
+        mBottomIcon = findViewById(R.id.bottombar_icon);
+
+        mTopbar_scaling.setText("100%");
+        mTopbar_pages.setText("1/1");
+    }
+
+    private View setListener(int id) {
+        View view = findViewById(id);
+        if (view != null) {
+            SelectUtil.setSelect(view);
+            view.setOnClickListener(this);
+        }
+        return view;
     }
 
     //region room
@@ -178,7 +242,7 @@ public class RoomActivity extends AppCompatActivity {
         sdkConfiguration.setFonts(map);
 
         //图片替换 API，需要在 whiteSDKConfig 中先行调用 setHasUrlInterrupterAPI，进行设置，否则不会被回调。
-        WhiteSdk whiteSdk = new WhiteSdk(whiteboardView, RoomActivity.this, sdkConfiguration,
+        WhiteSdk whiteSdk = new WhiteSdk(whiteboardView, WhiteRoomActivity.this, sdkConfiguration,
                 new UrlInterrupter() {
                     @Override
                     public String urlInterrupter(String sourceUrl) {
@@ -238,6 +302,7 @@ public class RoomActivity extends AppCompatActivity {
                 //记录加入房间消耗的时长
                 logRoomInfo("native join in room duration: " + (new Date().getTime() - joinDate.getTime()) / 1000f + "s");
                 room = wRoom;
+                room.disableSerialization(false);
                 addCustomEventListener();
             }
 
@@ -253,12 +318,14 @@ public class RoomActivity extends AppCompatActivity {
     private void alert(final String title, final String detail) {
 
         runOnUiThread(new Runnable() {
+            @Override
             public void run() {
-                AlertDialog alertDialog = new AlertDialog.Builder(RoomActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(WhiteRoomActivity.this).create();
                 alertDialog.setTitle(title);
                 alertDialog.setMessage(detail);
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
+                            @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 finish();
@@ -334,7 +401,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     public void reconnect(MenuItem item) {
-        final RoomActivity that = this;
+        final WhiteRoomActivity that = this;
         room.disconnect(new Promise<Object>() {
             @Override
             public void then(Object b) {
@@ -379,9 +446,9 @@ public class RoomActivity extends AppCompatActivity {
     @SuppressLint("SourceLockedOrientationActivity")
     public void orientation(MenuItem item) {
         if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            RoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            WhiteRoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            RoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            WhiteRoomActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
@@ -555,7 +622,7 @@ public class RoomActivity extends AppCompatActivity {
     public void insertPPT(MenuItem item) {
         logAction();
         room.putScenes(SCENE_DIR, new Scene[]{
-            new Scene("page2", new PptPage("https://white-pan.oss-cn-shanghai.aliyuncs.com/101/image/alin-rusu-1239275-unsplash_opt.jpg", 600d, 600d))
+                new Scene("page2", new PptPage("https://white-pan.oss-cn-shanghai.aliyuncs.com/101/image/alin-rusu-1239275-unsplash_opt.jpg", 600d, 600d))
         }, 0);
         room.setScenePath(SCENE_DIR + "/page2");
     }
@@ -706,4 +773,221 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     //endregion
+
+    @Override
+    public void onClick(View v) {
+        MemberState memberState;
+        switch (v.getId()) {
+            case R.id.topbar_revoke:
+                // 需要开启本地序列化，才能操作 redo undo
+//                room.disableSerialization(false);
+                room.undo();
+                break;
+            case R.id.topbar_cancelrevoke:
+                // 需要开启本地序列化，才能操作 redo undo
+//                room.disableSerialization(false);
+                room.redo();
+                break;
+            case  R.id.topbar_location:
+                break;
+            case R.id.topbar_color:
+                logAction();
+                Random ra =new Random();
+                ra.nextInt(255);
+                int r = ra.nextInt(255);
+                int g = ra.nextInt(255);
+                int b = ra.nextInt(255);
+                Log.d(TAG, "topbar_color rgb:" + r + g + b);
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{r, g, b});
+                memberState.setCurrentApplianceName(Appliance.PENCIL);
+                memberState.setStrokeWidth(4);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                showColorSelect();
+                break;
+            case R.id.topbar_preview:
+                //获取预览图，还没实现展示,可添加页面，删除页面
+                room.getScenePreviewImage("/init", new Promise<Bitmap>() {
+                    @Override
+                    public void then(Bitmap bitmap) {
+                        logAction("get bitmap");
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+                        logAction("get bitmap error");
+                    }
+                });
+                break;
+            case R.id.topbar_first:
+//                int nextIndex = room.getSceneState().getIndex() + 1;
+                mTopbar_pages.setText("1/" + room.getScenes().length);
+                room.setSceneIndex(0, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+                break;
+            case R.id.topbar_previous:
+                int previous = room.getSceneState().getIndex() - 1;
+                if (previous < 0) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (previous + 1) + "/" + room.getScenes().length);
+                room.setSceneIndex(previous, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+                break;
+            case R.id.topbar_next:
+                int maxIndex = room.getScenes().length - 1;
+                int nextIndex = room.getSceneState().getIndex() + 1;
+                if (nextIndex > maxIndex ) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (nextIndex + 1) + "/" + room.getScenes().length);
+                room.setSceneIndex(nextIndex, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+                break;
+            case R.id.topbar_last:
+                mTopbar_pages.setText("" + room.getScenes().length + "/" + room.getScenes().length);
+                room.setSceneIndex(room.getScenes().length - 1, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+                break;
+            case R.id.topbar_follow:
+                logAction();
+                if (!mIsFollow) {
+                    mIsFollow = true;
+                    room.setViewMode(ViewMode.Follower);
+                } else {
+                    mIsFollow = false;
+                    room.setViewMode(ViewMode.Freedom);
+                }
+                break;
+            case R.id.topbar_folder:break;
+            case R.id.topbar_share:break;
+            case R.id.topbar_exit:
+                finish();
+                break;
+
+            case R.id.bottombar_1:
+                logAction();
+                memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.SELECTOR);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_2:
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.PENCIL);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_3:
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.TEXT);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_4:
+                memberState = new MemberState();
+                memberState.setCurrentApplianceName(Appliance.ERASER);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_5:
+                //矩形或者圆形
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.RECTANGLE);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_6:
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.ARROW);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_7:
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.STRAIGHT);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_8:
+                logAction();
+                memberState = new MemberState();
+                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setCurrentApplianceName(Appliance.LASER_POINTER);
+                memberState.setStrokeWidth(10);
+                memberState.setTextSize(10);
+                room.setMemberState(memberState);
+                break;
+            case R.id.bottombar_9:
+                //上传弹窗
+                break;
+            case R.id.bottombar_10:
+                //缩小bottombar
+                mBottomBar.setVisibility(View.GONE);
+                mBottomIcon.setVisibility(View.VISIBLE);
+                break;
+            case R.id.bottombar_icon:
+                //显示bottombar
+                mBottomBar.setVisibility(View.VISIBLE);
+                mBottomIcon.setVisibility(View.GONE);
+                break;
+        }
+    }
+
+    private void showColorSelect() {
+        View popuWindow = LayoutInflater.from(this).inflate(R.layout.activity_create_room, null);
+        final PopupWindow popupWindow = new PopupWindow(popuWindow,200,300);//参数为1.View 2.宽度 3.高度
+        popupWindow.setOutsideTouchable(true);//设置点击外部区域可以取消popupWindow
+        popupWindow.showAsDropDown(mTopbar_ColorSelect);//设置popupWindow显示,并且告诉它显示在那个View下面
+    }
 }

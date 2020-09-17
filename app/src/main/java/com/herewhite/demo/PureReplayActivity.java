@@ -48,7 +48,7 @@ public class PureReplayActivity extends AppCompatActivity implements PlayerEvent
     protected boolean mUserIsSeeking;
     protected SeekBar mSeekBar;
     private final String TAG = "player";
-    private DemoAPI demoAPI = new DemoAPI();
+    private DemoAPI demoAPI = DemoAPI.get();
 
     public PureReplayActivity() {
         mUserIsSeeking = false;

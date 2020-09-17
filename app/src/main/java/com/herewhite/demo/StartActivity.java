@@ -12,7 +12,7 @@ import android.widget.EditText;
 public class StartActivity extends AppCompatActivity {
 
     public static final String EXTRA_MESSAGE = "com.example.whiteSDKDemo.UUID";
-    DemoAPI demoAPI = new DemoAPI();
+    DemoAPI demoAPI =  DemoAPI.get();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
