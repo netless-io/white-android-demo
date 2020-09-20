@@ -253,12 +253,14 @@ public class RoomActivity extends AppCompatActivity {
     private void alert(final String title, final String detail) {
 
         runOnUiThread(new Runnable() {
+            @Override
             public void run() {
                 AlertDialog alertDialog = new AlertDialog.Builder(RoomActivity.this).create();
                 alertDialog.setTitle(title);
                 alertDialog.setMessage(detail);
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
+                            @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 finish();

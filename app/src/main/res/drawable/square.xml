@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="36dp" android:height="36dp">
+        <shape
+            android:shape="rectangle">
+            <!-- 边框 -->
+            <stroke
+                android:width="2dp"
+                android:color="@android:color/black" />
+
+            <!-- 形状颜色（如果需要的是空心矩形, 则形状颜色设置为透明） -->
+            <solid android:color="#00000000" />
+
+        </shape>
+    </item>
+</selector>

@@ -10,14 +10,17 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.appcompat.app.AppCompatActivity;
+
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +31,14 @@ import com.herewhite.demo.DemoAPI;
 import com.herewhite.demo.LocalFileWebViewClient;
 import com.herewhite.demo.R;
 import com.herewhite.demo.WhiteWebViewClient;
+import com.herewhite.demo.adapter.ColorSelectAdapter;
+import com.herewhite.demo.adapter.PageSelectAdapter;
+import com.herewhite.demo.manager.SettingManager;
+import com.herewhite.demo.utils.ColorUtil;
+import com.herewhite.demo.utils.CommonUtil;
 import com.herewhite.demo.utils.SelectUtil;
+import com.herewhite.demo.widget.CirclePointView;
+import com.herewhite.demo.widget.NoScrollGridView;
 import com.herewhite.sdk.CommonCallbacks;
 import com.herewhite.sdk.domain.AnimationMode;
 import com.herewhite.sdk.domain.Scene;
@@ -70,9 +80,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Random;
 
 import wendu.dsbridge.DWebView;
+
 
 public class WhiteRoomActivity extends Activity implements View.OnClickListener {
     private static final String TAG = "WhiteRoomActivity";
@@ -92,11 +102,23 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     private WhiteboardView whiteboardView;
     private Room room;
 
-    private View mTopbar_ColorSelect;
+    private CirclePointView mTopbar_ColorSelect;
     private TextView mTopbar_scaling;
     private TextView mTopbar_pages;
     private View mBottomBar;
     private View mBottomIcon;
+    private LinearLayout mShowViewRe;
+    private View mBottomBar_shapeSelect;
+    private PopupWindow mRectanglePopu = null;
+
+    private PopupWindow mColorPopuWindow;
+    private NoScrollGridView mColorGridView;
+    private ColorSelectAdapter mColorSelectAdapter;
+
+    private int[] mColorArr;
+    private int mLastColor;
+    private int mLastTextSize;
+    private int mLastStrokeWidth;
 
     /**
      * 自定义 GlobalState 示例
@@ -142,19 +164,21 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         initView();
         Intent intent = getIntent();
         String uuid = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE);
+        String name = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE_NAME);
+        String joinToken = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE_ROOMTOKEN);
 
-        if (uuid == null) {
-            createRoom();
-        } else {
-            getRoomToken(uuid);
+        if (!TextUtils.isEmpty(name)) {
+            SettingManager.get().setName(name);
         }
+
+        joinRoom(uuid, joinToken);
     }
 
     private void initView() {
         setListener(R.id.topbar_revoke);
         setListener(R.id.topbar_cancelrevoke);
         setListener(R.id.topbar_location);
-        mTopbar_ColorSelect = setListener(R.id.topbar_color);
+        mTopbar_ColorSelect = (CirclePointView) setListener(R.id.topbar_color);
         mTopbar_scaling = findViewById(R.id.topbar_scaling);
         setListener(R.id.topbar_preview);
         setListener(R.id.topbar_first);
@@ -171,7 +195,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         setListener(R.id.bottombar_2);
         setListener(R.id.bottombar_3);
         setListener(R.id.bottombar_4);
-        setListener(R.id.bottombar_5);
+        mBottomBar_shapeSelect = setListener(R.id.bottombar_5);
         setListener(R.id.bottombar_6);
         setListener(R.id.bottombar_7);
         setListener(R.id.bottombar_8);
@@ -181,9 +205,15 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         setListener(R.id.bottombar_icon);
         mBottomBar = findViewById(R.id.bottom_bar);
         mBottomIcon = findViewById(R.id.bottombar_icon);
+        mShowViewRe = findViewById(R.id.showview_group);
 
         mTopbar_scaling.setText("100%");
         mTopbar_pages.setText("1/1");
+        mColorArr = getResources().getIntArray(R.array.color_arr);
+        mLastColor = mColorArr[0];
+        mLastTextSize = 10;
+        mLastStrokeWidth = 4;
+
     }
 
     private View setListener(int id) {
@@ -294,6 +324,17 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
             @Override
             public void onRoomStateChanged(RoomState modifyState) {
+                Log.d(TAG, "onRoomStateChanged:" + modifyState);
+                if (modifyState != null) {
+                    Log.d(TAG, "" + modifyState.getZoomScale() + "," + modifyState.getBroadcastState() + "," + modifyState.getMemberState()
+                            + "," + modifyState.getGlobalState()
+                            + "," + modifyState.getRoomMembers()
+                            + "," + modifyState.getSceneState()
+                    );
+                    if (modifyState.getZoomScale() != null){
+                        mTopbar_scaling.setText( (int)(modifyState.getZoomScale().doubleValue() * 100) + "%" );
+                    }
+                }
                 logRoomInfo(gson.toJson(modifyState));
             }
         }, new Promise<Room>() {
@@ -679,10 +720,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     public void textArea(MenuItem item) {
         logAction();
         MemberState memberState = new MemberState();
-        memberState.setStrokeColor(new int[]{99, 99, 99});
+        memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
         memberState.setCurrentApplianceName(Appliance.TEXT);
-        memberState.setStrokeWidth(10);
-        memberState.setTextSize(10);
+        memberState.setStrokeWidth(mLastStrokeWidth);
+        memberState.setTextSize(mLastTextSize);
         room.setMemberState(memberState);
     }
 
@@ -696,30 +737,30 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     public void pencil(MenuItem item) {
         logAction();
         MemberState memberState = new MemberState();
-        memberState.setStrokeColor(new int[]{99, 99, 99});
+        memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
         memberState.setCurrentApplianceName(Appliance.PENCIL);
-        memberState.setStrokeWidth(10);
-        memberState.setTextSize(10);
+        memberState.setStrokeWidth(mLastStrokeWidth);
+        memberState.setTextSize(mLastTextSize);
         room.setMemberState(memberState);
     }
 
     public void rectangle(MenuItem item) {
         logAction();
         MemberState memberState = new MemberState();
-        memberState.setStrokeColor(new int[]{99, 99, 99});
+        memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
         memberState.setCurrentApplianceName(Appliance.RECTANGLE);
-        memberState.setStrokeWidth(10);
-        memberState.setTextSize(10);
+        memberState.setStrokeWidth(mLastStrokeWidth);
+        memberState.setTextSize(mLastTextSize);
         room.setMemberState(memberState);
     }
 
     public void color(MenuItem item) {
         logAction();
         MemberState memberState = new MemberState();
-        memberState.setStrokeColor(new int[]{200, 200, 200});
+        memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
         memberState.setCurrentApplianceName(Appliance.PENCIL);
-        memberState.setStrokeWidth(4);
-        memberState.setTextSize(10);
+        memberState.setStrokeWidth(mLastStrokeWidth);
+        memberState.setTextSize(mLastTextSize);
         room.setMemberState(memberState);
     }
 
@@ -776,6 +817,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
+        if (room == null) {
+            return;
+        }
+
         MemberState memberState;
         switch (v.getId()) {
             case R.id.topbar_revoke:
@@ -792,33 +837,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.topbar_color:
                 logAction();
-                Random ra =new Random();
-                ra.nextInt(255);
-                int r = ra.nextInt(255);
-                int g = ra.nextInt(255);
-                int b = ra.nextInt(255);
-                Log.d(TAG, "topbar_color rgb:" + r + g + b);
-                memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{r, g, b});
-                memberState.setCurrentApplianceName(Appliance.PENCIL);
-                memberState.setStrokeWidth(4);
-                memberState.setTextSize(10);
-                room.setMemberState(memberState);
                 showColorSelect();
                 break;
             case R.id.topbar_preview:
-                //获取预览图，还没实现展示,可添加页面，删除页面
-                room.getScenePreviewImage("/init", new Promise<Bitmap>() {
-                    @Override
-                    public void then(Bitmap bitmap) {
-                        logAction("get bitmap");
-                    }
-
-                    @Override
-                    public void catchEx(SDKError t) {
-                        logAction("get bitmap error");
-                    }
-                });
+                showViewPreview();
                 break;
             case R.id.topbar_first:
 //                int nextIndex = room.getSceneState().getIndex() + 1;
@@ -911,19 +933,19 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             case R.id.bottombar_2:
                 logAction();
                 memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
                 memberState.setCurrentApplianceName(Appliance.PENCIL);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
+                memberState.setStrokeWidth(mLastStrokeWidth);
+                memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
                 break;
             case R.id.bottombar_3:
                 logAction();
                 memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
                 memberState.setCurrentApplianceName(Appliance.TEXT);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
+                memberState.setStrokeWidth(mLastStrokeWidth);
+                memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
                 break;
             case R.id.bottombar_4:
@@ -933,39 +955,33 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.bottombar_5:
                 //矩形或者圆形
-                logAction();
-                memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
-                memberState.setCurrentApplianceName(Appliance.RECTANGLE);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
-                room.setMemberState(memberState);
+                showRectangleSelect();
                 break;
             case R.id.bottombar_6:
                 logAction();
                 memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
                 memberState.setCurrentApplianceName(Appliance.ARROW);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
+                memberState.setStrokeWidth(mLastStrokeWidth);
+                memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
                 break;
             case R.id.bottombar_7:
                 logAction();
                 memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
                 memberState.setCurrentApplianceName(Appliance.STRAIGHT);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
+                memberState.setStrokeWidth(mLastStrokeWidth);
+                memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
                 break;
             case R.id.bottombar_8:
                 logAction();
                 memberState = new MemberState();
-                memberState.setStrokeColor(new int[]{99, 99, 99});
+                memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
                 memberState.setCurrentApplianceName(Appliance.LASER_POINTER);
-                memberState.setStrokeWidth(10);
-                memberState.setTextSize(10);
+                memberState.setStrokeWidth(mLastStrokeWidth);
+                memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
                 break;
             case R.id.bottombar_9:
@@ -985,9 +1001,176 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     }
 
     private void showColorSelect() {
-        View popuWindow = LayoutInflater.from(this).inflate(R.layout.activity_create_room, null);
-        final PopupWindow popupWindow = new PopupWindow(popuWindow,200,300);//参数为1.View 2.宽度 3.高度
-        popupWindow.setOutsideTouchable(true);//设置点击外部区域可以取消popupWindow
-        popupWindow.showAsDropDown(mTopbar_ColorSelect);//设置popupWindow显示,并且告诉它显示在那个View下面
+        if (mColorPopuWindow == null) {
+            View popu = LayoutInflater.from(this).inflate(R.layout.layout_room_popu_color_select, null);
+            //参数为1.View 2.宽度 3.高度
+            mColorPopuWindow = new PopupWindow(popu, CommonUtil.dp2px(this, 240), CommonUtil.dp2px(this, 180));
+            //设置点击外部区域可以取消popupWindow
+            mColorPopuWindow.setOutsideTouchable(true);
+
+
+            mColorGridView = popu.findViewById(R.id.gridview_color_select);
+            mColorSelectAdapter = new ColorSelectAdapter(this);
+            mColorSelectAdapter.setList(mColorArr);
+            mColorGridView.setAdapter(mColorSelectAdapter);
+
+            mColorGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    mLastColor = mColorArr[position];
+                    MemberState memberState = new MemberState();
+                    memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
+                    memberState.setCurrentApplianceName(Appliance.PENCIL);
+                    memberState.setStrokeWidth(mLastStrokeWidth);
+                    memberState.setTextSize(mLastTextSize);
+                    room.setMemberState(memberState);
+                    if (position == mColorArr.length -1) {
+                        mTopbar_ColorSelect.setCircleColor(R.color.white_for_colorselect);
+                    } else {
+                        mTopbar_ColorSelect.setCircleColor(mLastColor);
+                    }
+                    mColorPopuWindow.dismiss();
+                }
+            });
+        }
+        mColorSelectAdapter.notifyDataSetChanged();
+        //设置popupWindow显示,并且告诉它显示在那个View下面
+        mColorPopuWindow.showAsDropDown(mTopbar_ColorSelect);
+
+    }
+
+    private void showViewPreview() {
+        mShowViewRe.removeAllViews();
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_preview, null);
+
+        View addPage = view.findViewById(R.id.showview_add_page);
+        SelectUtil.setSelect(addPage);
+        addPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logAction();
+                int size = room.getSceneState().getScenes().length;
+                room.putScenes(SCENE_DIR, new Scene[]{
+                        new Scene("page1")}, 0);
+                room.setScenePath(SCENE_DIR + "/page1");
+                room.getScenes(new Promise<Scene[]>() {
+                    @Override
+                    public void then(Scene[] scenes) {
+                        Log.d(TAG, "add and syn getScens:" + scenes.length);
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+            }
+        });
+        View viewBg = view.findViewById(R.id.showview_bg);
+        viewBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        ListView pageList = view.findViewById(R.id.showview_preview_list);
+        PageSelectAdapter pageSelectAdapter = new PageSelectAdapter(this);
+        pageSelectAdapter.setListener(new PageSelectAdapter.OnPreviewItemClick() {
+            @Override
+            public void onPreviewImgClick(int position) {
+                int size = room.getSceneState().getScenes().length - 1;
+                if (position > size) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
+                room.setSceneIndex(position, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+                        if (result != null && result == true) {
+                            pageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                            pageSelectAdapter.setList(room.getScenes());
+                            pageSelectAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onPreviewDelClick(int position) {
+                int size = room.getSceneState().getScenes().length - 1;
+                if (position > size) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
+                room.removeScenes(SCENE_DIR + "/page" + position);
+                pageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                pageSelectAdapter.setList(room.getScenes());
+                pageSelectAdapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void getBitmap(int position, Promise<Bitmap> promise) {
+                String path = SCENE_DIR + "/page" + position;
+                if (position == 0) {
+                    path = "/init";
+                }
+                room.getScenePreviewImage(path, promise);
+            }
+        });
+        pageSelectAdapter.setList(room.getScenes());
+        pageList.setAdapter(pageSelectAdapter);
+        mShowViewRe.addView(view);
+    }
+
+    private void showRectangleSelect() {
+
+        if (mRectanglePopu == null) {
+            View popu = LayoutInflater.from(this).inflate(R.layout.layout_room_shape_select, null);
+            //参数为1.View 2.宽度 3.高度
+            mRectanglePopu = new PopupWindow(popu, CommonUtil.dp2px(this, 50), CommonUtil.dp2px(this, 100));
+            //设置点击外部区域可以取消popupWindow
+            mRectanglePopu.setOutsideTouchable(true);
+
+            View view = popu.findViewById(R.id.square);
+            SelectUtil.setSelect(view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    logAction();
+                    MemberState memberState = new MemberState();
+                    memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
+                    memberState.setCurrentApplianceName(Appliance.RECTANGLE);
+                    memberState.setStrokeWidth(mLastStrokeWidth);
+                    memberState.setTextSize(mLastTextSize);
+                    room.setMemberState(memberState);
+                    mRectanglePopu.dismiss();
+                }
+            });
+
+            view = popu.findViewById(R.id.circular);
+            SelectUtil.setSelect(view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    logAction();
+                    MemberState memberState = new MemberState();
+                    memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
+                    memberState.setCurrentApplianceName(Appliance.ELLIPSE);
+                    memberState.setStrokeWidth(mLastStrokeWidth);
+                    memberState.setTextSize(mLastTextSize);
+                    room.setMemberState(memberState);
+                    mRectanglePopu.dismiss();
+                }
+            });
+        }
+        //设置popupWindow显示,并且告诉它显示在那个View下面
+        mRectanglePopu.showAsDropDown(mBottomBar_shapeSelect);
     }
 }

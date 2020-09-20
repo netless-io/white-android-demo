@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.herewhite.demo.DemoAPI;
 import com.herewhite.demo.R;
 import com.herewhite.demo.RoomActivity;
+import com.herewhite.demo.manager.SettingManager;
 import com.herewhite.demo.utils.SelectUtil;
 
 public class JoinRoomActivity extends Activity implements View.OnClickListener, TextWatcher {
@@ -40,6 +41,11 @@ public class JoinRoomActivity extends Activity implements View.OnClickListener, 
         mSubEditText = findViewById(R.id.editText_sub);
         mEditText.addTextChangedListener(this);
         mSubEditText.addTextChangedListener(this);
+
+        String lastName = SettingManager.get().getName();
+        if (!TextUtils.isEmpty(lastName)) {
+            mEditText.setText(lastName);
+        }
     }
     private void setListener(int id, boolean setClickEff) {
         View view = findViewById(id);
@@ -111,7 +117,7 @@ public class JoinRoomActivity extends Activity implements View.OnClickListener, 
         if (uuid.length() > 0) {
             intent.putExtra(EXTRA_MESSAGE, uuid);
             intent.putExtra(EXTRA_MESSAGE_ROOMTOKEN, roomToken);
-            intent.putExtra(EXTRA_MESSAGE_ROOMTOKEN, name);
+            intent.putExtra(EXTRA_MESSAGE_NAME, name);
         }
 
         startActivity(intent);

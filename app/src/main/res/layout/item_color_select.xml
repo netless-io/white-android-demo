@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="55dp"
+    android:layout_height="55dp">
+
+    <com.herewhite.demo.widget.CirclePointView
+        android:id="@+id/color"
+        android:layout_centerInParent="true"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        app:strikeWidth="4dp"/>
+
+    <com.herewhite.demo.widget.CirclePointView
+        android:id="@+id/color_border"
+        android:layout_centerInParent="true"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        app:isSolid="false"
+        app:strikeWidth="2dp"/>
+
+    <com.herewhite.demo.widget.CirclePointView
+        android:id="@+id/color_select"
+        android:layout_centerInParent="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:isSolid="false"
+        app:strikeWidth="2dp"
+        android:alpha="0"/>
+
+</RelativeLayout>

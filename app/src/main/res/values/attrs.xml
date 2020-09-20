@@ -10,9 +10,9 @@
     </declare-styleable>
 
     <declare-styleable name="CirclePointView">
-        <attr name="pointColor" format="reference"></attr>
-        <attr name="isSolid" format="reference"></attr>
-        <attr name="strikeWidth" format="reference"></attr>
+        <attr name="pointColor" format="color"/>
+        <attr name="isSolid" format="boolean"/>
+        <attr name="strikeWidth" format="dimension"/>
     </declare-styleable>
 
 

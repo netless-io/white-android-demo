@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="color_arr">
+        <item>@color/color_slect_1</item>
+        <item>@color/color_slect_2</item>
+        <item>@color/color_slect_3</item>
+        <item>@color/color_slect_4</item>
+        <item>@color/color_slect_5</item>
+        <item>@color/color_slect_6</item>
+        <item>@color/color_slect_7</item>
+        <item>@color/color_slect_8</item>
+        <item>@color/color_slect_9</item>
+        <item>@color/color_slect_10</item>
+        <item>@color/color_slect_11</item>
+        <item>@color/color_slect_12</item>
+    </array>
+
+</resources>

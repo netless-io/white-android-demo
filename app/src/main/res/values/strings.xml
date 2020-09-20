@@ -107,5 +107,5 @@
     <string name="name">名字</string>
     <string name="room_number">房间号</string>
     <string name="need_get_sdk_token">请在 https://console.herewhite.com 中注册，并获取 sdk token，再进行使用。</string>
-
+    <string name="preview">预览</string>
 </resources>
