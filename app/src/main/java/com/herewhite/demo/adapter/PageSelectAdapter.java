@@ -87,7 +87,7 @@ public class PageSelectAdapter extends BaseAdapter {
         }
         SelectUtil.setSelect(viewHolder.previewImg);
         SelectUtil.setSelect(viewHolder.previewDel);
-
+        viewHolder.previewName.setText("" + (position + 1));
         if (mOnPreviewItemClick != null) {
             mOnPreviewItemClick.getBitmap(position, new Promise<Bitmap>() {
                 @Override

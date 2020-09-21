@@ -150,6 +150,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
         whiteboardView = findViewById(R.id.white);
         DWebView.setWebContentsDebuggingEnabled(true);
+        whiteboardView.requestFocus(View.FOCUS_DOWN);
         whiteboardView.getSettings().setAllowUniversalAccessFromFileURLs(true);
 
         /*
@@ -834,6 +835,11 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 room.redo();
                 break;
             case  R.id.topbar_location:
+                CameraConfig config = new CameraConfig();
+                config.setCenterX(0d);
+                config.setCenterY(0d);
+                config.setScale(1d);
+                room.moveCamera(config);
                 break;
             case R.id.topbar_color:
                 logAction();
@@ -1050,13 +1056,16 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             public void onClick(View v) {
                 logAction();
                 int size = room.getSceneState().getScenes().length;
-                room.putScenes(SCENE_DIR, new Scene[]{
-                        new Scene("page1")}, 0);
-                room.setScenePath(SCENE_DIR + "/page1");
+                long name = System.currentTimeMillis();
+                String currPath = room.getSceneState().getScenePath();
+                Log.d(TAG, "add page currPath:" + currPath);
+                room.putScenes("/", new Scene[]{
+                        new Scene("page" + name)}, size);
+                room.setScenePath( "/page" + name);
                 room.getScenes(new Promise<Scene[]>() {
                     @Override
                     public void then(Scene[] scenes) {
-                        Log.d(TAG, "add and syn getScens:" + scenes.length);
+                        Log.d(TAG, "add and syn getScens:" + scenes.length + "," + scenes[0].getName());
                     }
 
                     @Override
@@ -1108,7 +1117,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     return;
                 }
                 mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
-                room.removeScenes(SCENE_DIR + "/page" + position);
+                room.removeScenes("/" + room.getSceneState().getScenes()[position].getName());
                 pageSelectAdapter.setIndex(room.getSceneState().getIndex());
                 pageSelectAdapter.setList(room.getScenes());
                 pageSelectAdapter.notifyDataSetChanged();
@@ -1117,11 +1126,12 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
             @Override
             public void getBitmap(int position, Promise<Bitmap> promise) {
-                String path = SCENE_DIR + "/page" + position;
-                if (position == 0) {
-                    path = "/init";
+                try {
+                    String path = "/" + room.getSceneState().getScenes()[position].getName();
+                    room.getScenePreviewImage(path, promise);
+                } catch (Exception e) {
+                    Log.w(TAG, "getBitmap fail:" + e);
                 }
-                room.getScenePreviewImage(path, promise);
             }
         });
         pageSelectAdapter.setList(room.getScenes());
