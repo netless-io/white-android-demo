@@ -3,21 +3,31 @@ package com.herewhite.demo.ui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 
+import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -152,6 +162,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         DWebView.setWebContentsDebuggingEnabled(true);
         whiteboardView.requestFocus(View.FOCUS_DOWN);
         whiteboardView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        whiteboardView.setBackgroundColor(0);
+        whiteboardView.getBackground().setAlpha(0);
 
         /*
           使用阿里云的 HttpDns，避免 DNS 污染等问题
@@ -925,7 +937,9 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 }
                 break;
             case R.id.topbar_folder:break;
-            case R.id.topbar_share:break;
+            case R.id.topbar_share:
+                showShare();
+                break;
             case R.id.topbar_exit:
                 finish();
                 break;
@@ -992,6 +1006,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.bottombar_9:
                 //上传弹窗
+                showViewUpload();
                 break;
             case R.id.bottombar_10:
                 //缩小bottombar
@@ -1136,7 +1151,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         });
         pageSelectAdapter.setList(room.getScenes());
         pageList.setAdapter(pageSelectAdapter);
-        mShowViewRe.addView(view);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mShowViewRe.addView(view, params);
     }
 
     private void showRectangleSelect() {
@@ -1182,5 +1198,236 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         }
         //设置popupWindow显示,并且告诉它显示在那个View下面
         mRectanglePopu.showAsDropDown(mBottomBar_shapeSelect);
+    }
+
+    private void showShare() {
+        String link = "https://demo.netless.link/whiteboard/joiner/" + uuid;
+        mShowViewRe.removeAllViews();
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_share, null);
+
+        View viewBg = view.findViewById(R.id.showview_bg);
+        viewBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        View viewClose = view.findViewById(R.id.close);
+        SelectUtil.setSelect(viewClose);
+        viewClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+        View viewCopyUuid = view.findViewById(R.id.cp_uuid);
+        SelectUtil.setSelect(viewCopyUuid);
+        viewCopyUuid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //获取剪贴板管理器：
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                // 创建普通字符型ClipData
+                ClipData mClipData = ClipData.newPlainText("Label", uuid);
+                // 将ClipData内容放到系统剪贴板里。
+                cm.setPrimaryClip(mClipData);
+            }
+        });
+        View viewCopylink = view.findViewById(R.id.cp_link);
+        SelectUtil.setSelect(viewCopylink);
+        viewCopylink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //获取剪贴板管理器：
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                // 创建普通字符型ClipData
+                ClipData mClipData = ClipData.newPlainText("Label", link);
+                // 将ClipData内容放到系统剪贴板里。
+                cm.setPrimaryClip(mClipData);
+            }
+        });
+
+        View viewCopyAll = view.findViewById(R.id.btn_copy_all);
+        viewCopyAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String label = getString(R.string.room_uuid) + ":" + uuid + "\n"
+                        + getString(R.string.add_link) + ":" + link;
+
+                //获取剪贴板管理器：
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                // 创建普通字符型ClipData
+                ClipData mClipData = ClipData.newPlainText("Label", label);
+                // 将ClipData内容放到系统剪贴板里。
+                cm.setPrimaryClip(mClipData);
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        EditText editTextUuid = view.findViewById(R.id.edittext_uuid);
+        editTextUuid.setText(uuid);
+        EditText editTextLink = view.findViewById(R.id.edittext_link);
+        editTextLink.setText(link);
+        editTextUuid.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //无论什么操作恢复到原数据，不允许修改
+                if (!s.toString().equals(uuid)) {
+                    editTextUuid.setText(uuid);
+                }
+            }
+        });
+
+        editTextLink.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //无论什么操作恢复到原数据，不允许修改
+                if (!s.toString().equals(link)) {
+                    editTextUuid.setText(link);
+                }
+            }
+        });
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mShowViewRe.addView(view, params);
+    }
+
+    private void showViewUpload() {
+        mShowViewRe.removeAllViews();
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_upload, null);
+
+        View viewBg = view.findViewById(R.id.showview_bg);
+        viewBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        View viewRe = view.findViewById(R.id.upload_pic_re);
+        SelectUtil.setSelect(viewRe);
+        viewRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
+                startActivityForResult(intent,1);
+            }
+        });
+
+        viewRe = view.findViewById(R.id.upload_video_re);
+        SelectUtil.setSelect(viewRe);
+        viewRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
+                startActivityForResult(intent,2);
+            }
+        });
+
+        viewRe = view.findViewById(R.id.upload_media_re);
+        SelectUtil.setSelect(viewRe);
+        viewRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
+                startActivityForResult(intent,3);
+            }
+        });
+
+        viewRe = view.findViewById(R.id.data_to_web_re);
+        SelectUtil.setSelect(viewRe);
+        viewRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                //调用系统文件管理器打开指定路径目录
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                //intent.setDataAndType(Uri.fromFile(dir.getParentFile()), "file/*.txt");
+//                intent.setType("file/*.txt"); //华为手机mate7不支持
+                intent.setType("text/plain");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, 4);
+            }
+        });
+
+        viewRe = view.findViewById(R.id.doc_to_pic_re);
+        SelectUtil.setSelect(viewRe);
+        viewRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                //调用系统文件管理器打开指定路径目录
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                //intent.setDataAndType(Uri.fromFile(dir.getParentFile()), "file/*.txt");
+//                intent.setType("file/*.txt"); //华为手机mate7不支持
+                intent.setType("text/plain");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, 5);
+            }
+        });
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mShowViewRe.addView(view, params);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO 自动生成的方法存根
+        if (resultCode == RESULT_OK && null != data) {
+            Log.d(TAG, "onActivityResult:requestCode" + requestCode);
+            if (requestCode == 1) {
+                Uri selectedImage = data.getData();
+                String[] filePathColumn = { MediaStore.Images.Media.DATA };
+                //查询我们需要的数据
+                Cursor cursor = getContentResolver().query(selectedImage,
+                        filePathColumn, null, null, null);
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String picturePath = cursor.getString(columnIndex);
+                cursor.close();
+
+                //拿到了图片的路径picturePath可以自行使用
+//            img_view.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+                Log.d(TAG, "select pic path:" + picturePath);
+            }
+
+
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

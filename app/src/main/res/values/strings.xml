@@ -108,4 +108,18 @@
     <string name="room_number">房间号</string>
     <string name="need_get_sdk_token">请在 https://console.herewhite.com 中注册，并获取 sdk token，再进行使用。</string>
     <string name="preview">预览</string>
+    <string name="invite_members">邀请成员</string>
+    <string name="room_uuid">房间号</string>
+    <string name="add_link">加入链接</string>
+    <string name="copy">复制</string>
+    <string name="upload_pic">上传图片</string>
+    <string name="upload_pic_info">支持常见格式，可以改变图片大小和位置。</string>
+    <string name="upload_video">上传视频</string>
+    <string name="upload_video_info">支持 MP4 格式</string>
+    <string name="upload_media">上传音频</string>
+    <string name="upload_media_info">支持 MP3 格式</string>
+    <string name="data_to_web">资料转网页</string>
+    <string name="data_to_web_info">支持 pptx 格式，如果是 ppt 格式，请手动转换</string>
+    <string name="doc_to_pic">文档转图片</string>
+    <string name="doc_to_pic_info">支持 ppt、pptx、word 和 pdf.</string>
 </resources>

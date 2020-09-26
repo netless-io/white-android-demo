@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/showview_bg"
-    android:background="#44F4F4F4"
+    android:background="#77F4F4F4"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
