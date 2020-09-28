@@ -12,14 +12,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.herewhite.demo.DemoAPI;
+import com.herewhite.demo.DemoAPIv5;
 import com.herewhite.demo.R;
 import com.herewhite.demo.RoomActivity;
 import com.herewhite.demo.manager.SettingManager;
 import com.herewhite.demo.utils.SelectUtil;
 
 public class CreateRoomActivity extends Activity implements View.OnClickListener, TextWatcher {
-    private static final String TAG = "JoinRoomActivity";
+    private static final String TAG = "CreateRoomActivity";
     public static final String EXTRA_MESSAGE = "com.example.whiteSDKDemo.UUID";
     public static final String EXTRA_MESSAGE_ROOMTOKEN = "com.example.whiteSDKDemo.roomToken";
     public static final String EXTRA_MESSAGE_NAME = "com.example.whiteSDKDemo.name";
@@ -89,7 +89,7 @@ public class CreateRoomActivity extends Activity implements View.OnClickListener
     }
 
     private void createRoom() {
-        DemoAPI.get().getNewRoom(mEditText.getText().toString(), new DemoAPI.Result() {
+        DemoAPIv5.get().getNewRoom(mEditText.getText().toString(), new DemoAPIv5.Result() {
             @Override
             public void success(String uuid, String roomToken) {
                 joinRoom(uuid, roomToken, mEditText.getText().toString());
@@ -97,13 +97,14 @@ public class CreateRoomActivity extends Activity implements View.OnClickListener
 
             @Override
             public void fail(String message) {
+                Log.w(TAG, "createRoom fail:" + message);
                 tokenAlert(message);
             }
         });
     }
 
     private void joinRoom(String uuid, String roomToken, String name) {
-        if (!DemoAPI.get().validateToken()) {
+        if (!DemoAPIv5.get().validateToken()) {
             tokenAlert();
             return;
         }

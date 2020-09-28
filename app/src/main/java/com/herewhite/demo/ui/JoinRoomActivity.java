@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.herewhite.demo.DemoAPI;
+import com.herewhite.demo.DemoAPIv5;
 import com.herewhite.demo.R;
 import com.herewhite.demo.RoomActivity;
 import com.herewhite.demo.manager.SettingManager;
@@ -94,7 +94,7 @@ public class JoinRoomActivity extends Activity implements View.OnClickListener, 
     }
 
     private void joinNewRoom() {
-        DemoAPI.get().getRoomToken(mSubEditText.getText().toString(), new DemoAPI.Result() {
+        DemoAPIv5.get().getRoomToken(mSubEditText.getText().toString(), new DemoAPIv5.Result() {
             @Override
             public void success(String uuid, String roomToken) {
                 joinRoom(uuid, roomToken, mEditText.getText().toString());
@@ -108,7 +108,7 @@ public class JoinRoomActivity extends Activity implements View.OnClickListener, 
     }
 
     private void joinRoom(String uuid, String roomToken, String name) {
-        if (!DemoAPI.get().validateToken()) {
+        if (!DemoAPIv5.get().validateToken()) {
             tokenAlert();
             return;
         }

@@ -28,8 +28,8 @@ import okhttp3.Response;
 /**
  * Created by buhe on 2018/8/16.
  */
-@Deprecated
-public class DemoAPI {
+
+public class DemoAPIv5 {
 
     static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
@@ -38,7 +38,7 @@ public class DemoAPI {
      */
     private static String sdkToken = "请在 https://console.herewhite.com 中注册";
 
-    private static final String host = "https://cloudcapiv4.herewhite.com";
+    private static final String host = "https://shunt-api.netless.link/v5";
 
     public String getAppIdentifier() {
         return AppIdentifier;
@@ -47,9 +47,9 @@ public class DemoAPI {
     private String AppIdentifier = "792/uaYcRG0I7ctP9A";
     private String demoUUID = "daef60b584ea4892a381c410ae15fe28";
     private String demoRoomToken = "WHITEcGFydG5lcl9pZD1ZSEpVMmoxVXAyUzdoQTluV3dvaVlSRVZ3MlI5M21ibmV6OXcmc2lnPWJkODdlOGFkZDcwZmEzN2YzNWQ3OTAyYmViMWFlMDk2YjQ1ZWI0MmM6YWRtaW5JZD02Njcmcm9vbUlkPWRhZWY2MGI1ODRlYTQ4OTJhMzgxYzQxMGFlMTVmZTI4JnRlYW1JZD03OTImcm9sZT1yb29tJmV4cGlyZV90aW1lPTE2MTIwMzU1MTgmYWs9WUhKVTJqMVVwMlM3aEE5bld3b2lZUkVWdzJSOTNtYm5lejl3JmNyZWF0ZV90aW1lPTE1ODA0Nzg1NjYmbm9uY2U9MTU4MDQ3ODU2NTczODAw";
-    private static DemoAPI mApi;
+    private static DemoAPIv5 mApi;
 
-    private DemoAPI() {
+    private DemoAPIv5() {
         if (!TextUtils.isEmpty(BuildConfig.sdkTokenByEnv)) {
             sdkToken = BuildConfig.sdkTokenByEnv;
         }
@@ -58,11 +58,11 @@ public class DemoAPI {
         }
     }
 
-    public static DemoAPI get() {
+    public static DemoAPIv5 get() {
         if (mApi == null) {
-            synchronized (DemoAPI.class) {
+            synchronized (DemoAPIv5.class) {
                 if (mApi == null) {
-                    mApi = new DemoAPI();
+                    mApi = new DemoAPIv5();
                 }
             }
         }
@@ -92,44 +92,7 @@ public class DemoAPI {
         void fail(String message);
     }
 
-    public void getNewRoom(final Result result) {
-
-        if (hasDemoInfo()) {
-            result.success(demoUUID, demoRoomToken);
-            return;
-        }
-
-        createRoom(100, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                result.fail("网络请求错误：" + e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                try {
-                    if (response.code() == 200) {
-                        JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
-                        String uuid = room.getAsJsonObject("msg").getAsJsonObject("room").get("uuid").getAsString();
-                        String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
-                        result.success(uuid, roomToken);
-                    } else {
-                        assert response.body() != null;
-                        result.fail("创建房间失败：" + response.body().string());
-                    }
-                } catch (Throwable e) {
-                    result.fail("网络请求错误：" + e.toString());
-                }
-            }
-        });
-    }
-
     public void getNewRoom(String name, final Result result) {
-
-        if (hasDemoInfo()) {
-            result.success(demoUUID, demoRoomToken);
-            return;
-        }
 
         createRoom(name, 100, new Callback() {
             @Override
@@ -140,11 +103,31 @@ public class DemoAPI {
             @Override
             public void onResponse(Call call, Response response) {
                 try {
-                    if (response.code() == 200) {
+                    int code = response.code();
+                    if (code == 200 || code == 201) {
                         JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
-                        String uuid = room.getAsJsonObject("msg").getAsJsonObject("room").get("uuid").getAsString();
-                        String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
-                        result.success(uuid, roomToken);
+                        String uuid = room.get("uuid").getAsString();
+                        getRoomToken(uuid, new Callback() {
+
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                result.fail("网络请求错误：" + e.toString());
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                int code = response.code();
+                                if (code == 200 || code == 201) {
+                                    String token = response.body().string();
+                                    token = token.replaceAll("\"", "");
+                                    result.success(uuid, token);
+                                } else {
+                                    assert response.body() != null;
+                                    result.fail("创建房间失败：" + response.body().string());
+                                }
+                            }
+                        });
+
                     } else {
                         assert response.body() != null;
                         result.fail("创建房间失败：" + response.body().string());
@@ -156,17 +139,17 @@ public class DemoAPI {
         });
     }
 
-    private void createRoom(int limit, Callback callback) {
+    private void createRoom(String name, int limit, Callback callback) {
 
         Map<String, Object> roomSpec = new HashMap<>();
-        roomSpec.put("name", "Android test room");
+        roomSpec.put("name", name);
         roomSpec.put("limit", limit);
-        roomSpec.put("mode", "historied");
+        roomSpec.put("isRecord", false);
 
         RequestBody body = RequestBody.create(JSON, gson.toJson(roomSpec));
 
         Request request = new Request.Builder()
-                .url(host + "/room")
+                .url(host + "/rooms")
                 .addHeader("token", sdkToken)
                 .post(body)
                 .build();
@@ -175,37 +158,31 @@ public class DemoAPI {
         call.enqueue(callback);
     }
 
-    private void createRoom(String name, int limit, Callback callback) {
+    public void getRoomToken(final String uuid, final Callback callback) {
 
         Map<String, Object> roomSpec = new HashMap<>();
-        roomSpec.put("name", name);
-        roomSpec.put("limit", limit);
-        roomSpec.put("mode", "historied");
+        roomSpec.put("lifespan", 0);
+        roomSpec.put("role", "admin");
 
         RequestBody body = RequestBody.create(JSON, gson.toJson(roomSpec));
-
         Request request = new Request.Builder()
-                .url(host + "/room")
+                .url(host + "/tokens/rooms/" + uuid)
                 .addHeader("token", sdkToken)
                 .post(body)
                 .build();
-
         Call call = client.newCall(request);
         call.enqueue(callback);
     }
 
     public void getRoomToken(final String uuid, final Result result) {
 
-        if (uuid.equals(demoUUID)) {
-            result.success(demoUUID, demoRoomToken);
-            return;
-        }
-
         Map<String, Object> roomSpec = new HashMap<>();
+        roomSpec.put("lifespan", 0);
+        roomSpec.put("role", "admin");
 
         RequestBody body = RequestBody.create(JSON, gson.toJson(roomSpec));
         Request request = new Request.Builder()
-                .url(host + "/room/join?uuid=" + uuid)
+                .url(host + "/tokens/rooms/" + uuid)
                 .addHeader("token", sdkToken)
                 .post(body)
                 .build();
@@ -220,10 +197,12 @@ public class DemoAPI {
             public void onResponse(Call call, Response response) {
                 try {
                     assert response.body() != null;
-                    if (response.code() == 200) {
-                        JsonObject room = gson.fromJson(response.body().string(), JsonObject.class);
-                        String roomToken = room.getAsJsonObject("msg").get("roomToken").getAsString();
-                        result.success(uuid, roomToken);
+                    int code = response.code();
+                    if (code == 200 || code == 201) {
+                        String token = response.body().string();
+                        token = token.replaceAll("\"", "");
+                        Log.d(TAG, "get token:" + token);
+                        result.success(uuid, token);
                     } else {
                         result.fail("获取房间 token 失败：" + response.body().string());
                     }

@@ -11,7 +11,17 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        buildConfigField "String", "sdkTokenByEnv", getEnvSdkToken()
+        //sdktoken
+        buildConfigField "String", "sdkTokenByEnv", getEnv("sdkTokenByEnv")
+        //aliyun-oss-android-sdk必须配置
+        buildConfigField "String", "AK", getEnv("AK")
+        buildConfigField "String", "SK", getEnv("SK")
+        buildConfigField "String", "OSSREGION", getEnv("OSSREGION")
+        buildConfigField "String", "BUCKET", getEnv("BUCKET")
+        buildConfigField "String", "FOLDER", getEnv("FOLDER")
+        buildConfigField "String", "PREFIX", getEnv("PREFIX")
+        buildConfigField "String", "APPIDENTIFIER", getEnv("APPIDENTIFIER")
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             //'armeabi-v7a', "armeabi", "x86",
@@ -34,14 +44,16 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
+
 /*
-*  从环境变量获取sdkToken;
+*  从环境变量获取参数;
 * */
-String getEnvSdkToken() {
-    def sdkTokenByEnv = System.getenv("sdkTokenByEnv") as String?: ""
-    println("sdkTokenByEnv:" + sdkTokenByEnv)
-    return "\"" + sdkTokenByEnv + "\"";
+String getEnv(String strTag) {
+    def value = System.getenv(strTag) as String?: ""
+    println("getByEnv: " + strTag + ":" + value)
+    return "\"" + value + "\"";
 }
+
 
 dependencies {
     implementation 'com.github.duty-os:white-sdk-android:2.9.14'
@@ -66,4 +78,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-core:2.11.4'
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.11.4'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.11.4'
+
+    //上传文件 aliyun-oss-android-sdk
+    implementation 'com.aliyun.dpa:oss-android-sdk:+'
 }

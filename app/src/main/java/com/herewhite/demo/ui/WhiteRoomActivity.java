@@ -36,16 +36,24 @@ import android.widget.Toast;
 
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
+import com.alibaba.sdk.android.oss.ClientException;
+import com.alibaba.sdk.android.oss.ServiceException;
+import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
+import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
+import com.alibaba.sdk.android.oss.model.PutObjectRequest;
+import com.alibaba.sdk.android.oss.model.PutObjectResult;
 import com.google.gson.Gson;
-import com.herewhite.demo.DemoAPI;
+import com.herewhite.demo.DemoAPIv5;
 import com.herewhite.demo.LocalFileWebViewClient;
 import com.herewhite.demo.R;
 import com.herewhite.demo.WhiteWebViewClient;
 import com.herewhite.demo.adapter.ColorSelectAdapter;
 import com.herewhite.demo.adapter.PageSelectAdapter;
+import com.herewhite.demo.manager.AliOssSdkManager;
 import com.herewhite.demo.manager.SettingManager;
 import com.herewhite.demo.utils.ColorUtil;
 import com.herewhite.demo.utils.CommonUtil;
+import com.herewhite.demo.utils.FileChooseUtil;
 import com.herewhite.demo.utils.SelectUtil;
 import com.herewhite.demo.widget.CirclePointView;
 import com.herewhite.demo.widget.NoScrollGridView;
@@ -103,7 +111,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     final String ROOM_INFO = "room info";
     final String ROOM_ACTION = "room action";
     final Gson gson = new Gson();
-    final DemoAPI demoAPI = DemoAPI.get();
+    final DemoAPIv5 demoAPI = DemoAPIv5.get();
 
     private String uuid;
     private String roomToken;
@@ -185,6 +193,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         }
 
         joinRoom(uuid, joinToken);
+        AliOssSdkManager.get();
     }
 
     private void initView() {
@@ -238,23 +247,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         return view;
     }
 
-    //region room
-    private void createRoom() {
-        demoAPI.getNewRoom(new DemoAPI.Result() {
-            @Override
-            public void success(String uuid, String roomToken) {
-                joinRoom(uuid, roomToken);
-            }
-
-            @Override
-            public void fail(String message) {
-                alert("创建房间失败", message);
-            }
-        });
-    }
-
     private void getRoomToken(final String uuid) {
-        demoAPI.getRoomToken(uuid, new DemoAPI.Result() {
+        demoAPI.getRoomToken(uuid, new DemoAPIv5.Result() {
             @Override
             public void success(String uuid, String roomToken) {
                 joinRoom(uuid, roomToken);
@@ -1331,11 +1325,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
                 mShowViewRe.removeAllViews();
-                Intent intent = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
-                startActivityForResult(intent,1);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");//选择图片
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -1345,11 +1338,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
                 mShowViewRe.removeAllViews();
-                Intent intent = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
-                startActivityForResult(intent,2);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("video/*"); //选择视频 （mp4 3gp 是android支持的视频格式）
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, 2);
             }
         });
 
@@ -1359,11 +1351,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
                 mShowViewRe.removeAllViews();
-                Intent intent = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-                //第二个参数：1，用来表示是哪一个startActivityForResult发起的，以便回调分别。回调中的requestCode
-                startActivityForResult(intent,3);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("audio/*"); //选择音频
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, 3);
             }
         });
 
@@ -1377,7 +1368,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 //intent.setDataAndType(Uri.fromFile(dir.getParentFile()), "file/*.txt");
 //                intent.setType("file/*.txt"); //华为手机mate7不支持
-                intent.setType("text/plain");
+                intent.setType("*/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent, 4);
             }
@@ -1393,7 +1384,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 //intent.setDataAndType(Uri.fromFile(dir.getParentFile()), "file/*.txt");
 //                intent.setType("file/*.txt"); //华为手机mate7不支持
-                intent.setType("text/plain");
+                intent.setType("*/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent, 5);
             }
@@ -1406,27 +1397,44 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO 自动生成的方法存根
         if (resultCode == RESULT_OK && null != data) {
             Log.d(TAG, "onActivityResult:requestCode" + requestCode);
-            if (requestCode == 1) {
-                Uri selectedImage = data.getData();
-                String[] filePathColumn = { MediaStore.Images.Media.DATA };
-                //查询我们需要的数据
-                Cursor cursor = getContentResolver().query(selectedImage,
-                        filePathColumn, null, null, null);
-                cursor.moveToFirst();
+            Uri uri = data.getData();
+            String chooseFilePath = FileChooseUtil.getInstance(this).getChooseFileResultPath(uri);
+            Log.d(TAG, "chooseFilePath：" + chooseFilePath);
+            String remotePath = "file_" + System.currentTimeMillis();
+            AliOssSdkManager.get().upLoad(remotePath, chooseFilePath, new OSSProgressCallback<PutObjectRequest>() {
+                @Override
+                public void onProgress(PutObjectRequest request, long currentSize, long totalSize) {
+                    Log.d(TAG, "PutObject:" + "currentSize: " + currentSize + " totalSize: " + totalSize);
+                }
+            }, new OSSCompletedCallback<PutObjectRequest, PutObjectResult>() {
+                @Override
+                public void onSuccess(PutObjectRequest request, PutObjectResult result) {
+                    Log.d(TAG, "PutObject" + "UploadSuccess:" + request);
+                    String urlpath = AliOssSdkManager.get().getBasePath() + remotePath;
+                    Log.d(TAG, "urlpath:" + urlpath);
+                    if (requestCode == 1) {
+                        room.insertImage(new ImageInformationWithUrl(0d, 0d, 200d, 200d, urlpath));
+                    }
+                }
 
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                String picturePath = cursor.getString(columnIndex);
-                cursor.close();
-
-                //拿到了图片的路径picturePath可以自行使用
-//            img_view.setImageBitmap(BitmapFactory.decodeFile(picturePath));
-                Log.d(TAG, "select pic path:" + picturePath);
-            }
-
-
+                @Override
+                public void onFailure(PutObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
+                    // 请求异常
+                    if (clientExcepion != null) {
+                        // 本地异常如网络异常等
+                        clientExcepion.printStackTrace();
+                    }
+                    if (serviceException != null) {
+                        // 服务异常
+                        Log.e(TAG, "ErrorCode" + serviceException.getErrorCode());
+                        Log.e(TAG, "RequestId" + serviceException.getRequestId());
+                        Log.e(TAG, "HostId" + serviceException.getHostId());
+                        Log.e(TAG, "RawMessage" + serviceException.getRawMessage());
+                    }
+                }
+            });
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
