@@ -15,4 +15,36 @@
         <item>@color/color_slect_12</item>
     </array>
 
+    <array name="appliance_arr">
+        <item>@id/bottombar_1</item>
+        <item>@id/bottombar_2</item>
+        <item>@id/bottombar_3</item>
+        <item>@id/bottombar_4</item>
+        <item>@id/bottombar_5</item>
+        <item>@id/bottombar_6</item>
+        <item>@id/bottombar_7</item>
+        <item>@id/bottombar_8</item>
+    </array>
+
+    <array name="drawable_arr">
+        <item>@mipmap/ic_bottombar_1</item>
+        <item>@mipmap/ic_bottombar_2</item>
+        <item>@mipmap/ic_bottombar_3</item>
+        <item>@mipmap/ic_bottombar_4</item>
+        <item>@mipmap/ic_bottombar_5</item>
+        <item>@mipmap/ic_bottombar_6</item>
+        <item>@mipmap/ic_bottombar_7</item>
+        <item>@mipmap/ic_bottombar_8</item>
+    </array>
+
+    <array name="drawable_select_arr">
+        <item>@mipmap/ic_bottombar_1_select</item>
+        <item>@mipmap/ic_bottombar_2_select</item>
+        <item>@mipmap/ic_bottombar_3_select</item>
+        <item>@mipmap/ic_bottombar_4_select</item>
+        <item>@mipmap/ic_bottombar_5_select</item>
+        <item>@mipmap/ic_bottombar_6_select</item>
+        <item>@mipmap/ic_bottombar_7_select</item>
+        <item>@mipmap/ic_bottombar_8_select</item>
+    </array>
 </resources>

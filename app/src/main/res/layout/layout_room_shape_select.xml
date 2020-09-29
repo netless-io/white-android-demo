@@ -16,21 +16,17 @@
         <ImageView
             android:id="@+id/square"
             android:layout_centerHorizontal="true"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="20dp"
-            android:padding="10dp"
-            android:background="@drawable/square"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@mipmap/ic_bottom_pop_shape"
             />
 
         <ImageView
             android:id="@+id/circular"
             android:layout_centerHorizontal="true"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="20dp"
-            android:padding="10dp"
-            android:background="@drawable/circular"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@mipmap/ic_bottom_pop_circle"
             android:layout_below="@+id/square"
             />
     </RelativeLayout>

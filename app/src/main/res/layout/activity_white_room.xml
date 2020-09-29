@@ -62,6 +62,7 @@
                 app:pointColor="@color/color_slect_1"
                 />
             <RelativeLayout
+                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <TextView
@@ -169,6 +170,19 @@
 
     </HorizontalScrollView>
 
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_below="@+id/top_bar"
+        android:layout_alignLeft="@+id/top_bar"
+        android:layout_alignRight="@+id/top_bar"
+        android:max="100"
+        android:progress="50"
+        android:progressDrawable="@drawable/layer_list_progressbar"
+        android:visibility="gone"
+        android:id="@+id/progressBar"/>
+
     <HorizontalScrollView
         android:id="@+id/bottom_bar"
         android:layout_alignParentBottom="true"
@@ -263,8 +277,8 @@
     <ImageView
         android:id="@+id/bottombar_icon"
         android:visibility="gone"
-        android:layout_width="55dp"
-        android:layout_height="43dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:background="@mipmap/ic_bottombar_icon"/>

@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +32,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -133,10 +135,16 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     private NoScrollGridView mColorGridView;
     private ColorSelectAdapter mColorSelectAdapter;
 
+    private ProgressBar mUploadProgress;
+
+    private int[] mIdArr;
+    private int[] mDrawableArr;
+    private int[] mDrawableSelectArr;
     private int[] mColorArr;
     private int mLastColor;
     private int mLastTextSize;
     private int mLastStrokeWidth;
+    private String mLastAppliance = Appliance.PENCIL;
 
     /**
      * 自定义 GlobalState 示例
@@ -228,6 +236,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         mBottomBar = findViewById(R.id.bottom_bar);
         mBottomIcon = findViewById(R.id.bottombar_icon);
         mShowViewRe = findViewById(R.id.showview_group);
+        mUploadProgress = findViewById(R.id.progressBar);
 
         mTopbar_scaling.setText("100%");
         mTopbar_pages.setText("1/1");
@@ -235,7 +244,37 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         mLastColor = mColorArr[0];
         mLastTextSize = 10;
         mLastStrokeWidth = 4;
+        initArr();
+        setAppliance(mLastAppliance);
 
+    }
+
+    private void initArr() {
+        TypedArray array;
+        int length;
+        array = getResources().obtainTypedArray(R.array.appliance_arr);
+        length = array.length();
+        mIdArr = new int[length];
+        for (int i = 0; i < length; i++) {
+            mIdArr[i] = array.getResourceId(i, 0);
+        }
+
+        array = getResources().obtainTypedArray(R.array.drawable_arr);
+        length = array.length();
+        mDrawableArr = new int[length];
+        for (int i = 0; i < length; i++) {
+            mDrawableArr[i] = array.getResourceId(i, 0);
+        }
+
+        array = getResources().obtainTypedArray(R.array.drawable_select_arr);
+        length = array.length();
+        mDrawableSelectArr = new int[length];
+        for (int i = 0; i < length; i++) {
+            mDrawableSelectArr[i] = array.getResourceId(i, 0);
+        }
+
+
+        array.recycle();
     }
 
     private View setListener(int id) {
@@ -925,9 +964,13 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 if (!mIsFollow) {
                     mIsFollow = true;
                     room.setViewMode(ViewMode.Follower);
+                    findViewById(R.id.topbar_follow).setBackground(getResources().getDrawable(R.mipmap.ic_topbar_follow_select));
+                    showToast(getString(R.string.follow_info));
                 } else {
                     mIsFollow = false;
                     room.setViewMode(ViewMode.Freedom);
+                    findViewById(R.id.topbar_follow).setBackground(getResources().getDrawable(R.mipmap.ic_topbar_follow));
+                    showToast(getString(R.string.freedom_info));
                 }
                 break;
             case R.id.topbar_folder:break;
@@ -943,6 +986,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState = new MemberState();
                 memberState.setCurrentApplianceName(Appliance.SELECTOR);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.SELECTOR);
                 break;
             case R.id.bottombar_2:
                 logAction();
@@ -952,6 +996,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState.setStrokeWidth(mLastStrokeWidth);
                 memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.PENCIL);
                 break;
             case R.id.bottombar_3:
                 logAction();
@@ -961,11 +1006,13 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState.setStrokeWidth(mLastStrokeWidth);
                 memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.TEXT);
                 break;
             case R.id.bottombar_4:
                 memberState = new MemberState();
                 memberState.setCurrentApplianceName(Appliance.ERASER);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.ERASER);
                 break;
             case R.id.bottombar_5:
                 //矩形或者圆形
@@ -979,6 +1026,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState.setStrokeWidth(mLastStrokeWidth);
                 memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.ARROW);
                 break;
             case R.id.bottombar_7:
                 logAction();
@@ -988,6 +1036,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState.setStrokeWidth(mLastStrokeWidth);
                 memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.STRAIGHT);
                 break;
             case R.id.bottombar_8:
                 logAction();
@@ -997,6 +1046,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 memberState.setStrokeWidth(mLastStrokeWidth);
                 memberState.setTextSize(mLastTextSize);
                 room.setMemberState(memberState);
+                setAppliance(Appliance.LASER_POINTER);
                 break;
             case R.id.bottombar_9:
                 //上传弹窗
@@ -1014,6 +1064,57 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 break;
         }
     }
+
+    private void resetAppliance() {
+        for (int i = 0; i < mIdArr.length; ++i) {
+            View view = findViewById(mIdArr[i]);
+            if (view != null) {
+                view.setBackground(getResources().getDrawable(mDrawableArr[i]));
+            }
+        }
+    }
+
+    private void setAppliance(int index) {
+        resetAppliance();
+        View view = findViewById(mIdArr[index]);
+        if (view != null) {
+            view.setBackground(getResources().getDrawable(mDrawableSelectArr[index]));
+        }
+    }
+
+    private void setAppliance(String appliance) {
+        mLastAppliance = appliance;
+        switch (appliance) {
+            case Appliance.SELECTOR:
+                setAppliance(0);
+                break;
+            case Appliance.PENCIL:
+                setAppliance(1);
+                break;
+            case Appliance.TEXT:
+                setAppliance(2);
+                break;
+            case Appliance.ERASER:
+                setAppliance(3);
+                break;
+            case Appliance.RECTANGLE:
+                setAppliance(4);
+                break;
+            case Appliance.ELLIPSE:
+                setAppliance(4);
+                break;
+            case Appliance.ARROW:
+                setAppliance(5);
+                break;
+            case Appliance.STRAIGHT:
+                setAppliance(6);
+                break;
+            case Appliance.LASER_POINTER:
+                setAppliance(7);
+                break;
+        }
+    }
+
 
     private void showColorSelect() {
         if (mColorPopuWindow == null) {
@@ -1035,7 +1136,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     mLastColor = mColorArr[position];
                     MemberState memberState = new MemberState();
                     memberState.setStrokeColor(ColorUtil.changeColor2Arr(mLastColor));
-                    memberState.setCurrentApplianceName(Appliance.PENCIL);
+                    memberState.setCurrentApplianceName(mLastAppliance);
                     memberState.setStrokeWidth(mLastStrokeWidth);
                     memberState.setTextSize(mLastTextSize);
                     room.setMemberState(memberState);
@@ -1154,7 +1255,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         if (mRectanglePopu == null) {
             View popu = LayoutInflater.from(this).inflate(R.layout.layout_room_shape_select, null);
             //参数为1.View 2.宽度 3.高度
-            mRectanglePopu = new PopupWindow(popu, CommonUtil.dp2px(this, 50), CommonUtil.dp2px(this, 100));
+            mRectanglePopu = new PopupWindow(popu, CommonUtil.dp2px(this, 40), CommonUtil.dp2px(this, 80));
             //设置点击外部区域可以取消popupWindow
             mRectanglePopu.setOutsideTouchable(true);
 
@@ -1170,6 +1271,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     memberState.setStrokeWidth(mLastStrokeWidth);
                     memberState.setTextSize(mLastTextSize);
                     room.setMemberState(memberState);
+                    setAppliance(Appliance.RECTANGLE);
                     mRectanglePopu.dismiss();
                 }
             });
@@ -1186,6 +1288,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     memberState.setStrokeWidth(mLastStrokeWidth);
                     memberState.setTextSize(mLastTextSize);
                     room.setMemberState(memberState);
+                    setAppliance(Appliance.ELLIPSE);
                     mRectanglePopu.dismiss();
                 }
             });
@@ -1407,6 +1510,14 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 @Override
                 public void onProgress(PutObjectRequest request, long currentSize, long totalSize) {
                     Log.d(TAG, "PutObject:" + "currentSize: " + currentSize + " totalSize: " + totalSize);
+                    mUploadProgress.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUploadProgress.setMax((int)totalSize);
+                            mUploadProgress.setProgress((int)currentSize);
+                            mUploadProgress.setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
             }, new OSSCompletedCallback<PutObjectRequest, PutObjectResult>() {
                 @Override
@@ -1414,8 +1525,22 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     Log.d(TAG, "PutObject" + "UploadSuccess:" + request);
                     String urlpath = AliOssSdkManager.get().getBasePath() + remotePath;
                     Log.d(TAG, "urlpath:" + urlpath);
+                    mUploadProgress.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUploadProgress.setProgress(0);
+                            mUploadProgress.setVisibility(View.GONE);
+                        }
+                    });
+
                     if (requestCode == 1) {
-                        room.insertImage(new ImageInformationWithUrl(0d, 0d, 200d, 200d, urlpath));
+                        mUploadProgress.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                room.insertImage(new ImageInformationWithUrl(0d, 0d, 200d, 200d, urlpath));
+                            }
+                        });
+
                     }
                 }
 
@@ -1433,6 +1558,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                         Log.e(TAG, "HostId" + serviceException.getHostId());
                         Log.e(TAG, "RawMessage" + serviceException.getRawMessage());
                     }
+                    mUploadProgress.setVisibility(View.GONE);
                 }
             });
         }
