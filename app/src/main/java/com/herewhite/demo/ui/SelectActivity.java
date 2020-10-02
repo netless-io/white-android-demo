@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.herewhite.demo.DemoAPIv5;
 import com.herewhite.demo.R;
 import com.herewhite.demo.RoomActivity;
+import com.herewhite.demo.manager.SettingManager;
 import com.herewhite.demo.utils.SelectUtil;
 
 public class SelectActivity extends BaseActivity implements View.OnClickListener {
@@ -23,7 +24,12 @@ public class SelectActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select);
         initView();
-        demoAPI.downloadZip("https://convertcdn.netless.link/dynamicConvert/e1ee27fdb0fc4b7c8f649291010c4882.zip", getCacheDir().getAbsolutePath());
+
+        if (!SettingManager.get().getDownLoadZip()) {
+            //已成功处理过就不要下载了,比较消耗资源
+            demoAPI.downloadZip("https://convertcdn.netless.link/dynamicConvert/e1ee27fdb0fc4b7c8f649291010c4882.zip", getCacheDir().getAbsolutePath());
+        }
+
 
         checkPermission(null, R.string.ask_again,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,

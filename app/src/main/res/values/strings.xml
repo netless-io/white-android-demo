@@ -128,4 +128,7 @@
     <string name="cancel">取消</string>
     <string name="follow_info">其他用户将跟随您的视角</string>
     <string name="freedom_info">其他用户将停止跟随您的视角</string>
+    <string name="exit_room">退出教室</string>
+    <string name="exit_this_room">确认退出</string>
+    <string name="jump_to_replay">查看回放</string>
 </resources>

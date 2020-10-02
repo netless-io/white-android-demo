@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.herewhite.demo.manager.SettingManager;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -76,7 +77,7 @@ public class DemoAPIv5 {
     private OkHttpClient client = new OkHttpClient();
     private Gson gson = new Gson();
 
-    boolean hasDemoInfo() {
+    public boolean hasDemoInfo() {
         if (TextUtils.isEmpty(BuildConfig.sdkTokenByEnv)) {
             return demoUUID.length() > 0 && demoRoomToken.length() > 0;
         }
@@ -144,7 +145,7 @@ public class DemoAPIv5 {
         Map<String, Object> roomSpec = new HashMap<>();
         roomSpec.put("name", name);
         roomSpec.put("limit", limit);
-        roomSpec.put("isRecord", false);
+        roomSpec.put("isRecord", true);
 
         RequestBody body = RequestBody.create(JSON, gson.toJson(roomSpec));
 
@@ -241,6 +242,8 @@ public class DemoAPIv5 {
                 fos.close();
                 unzip(new File(path + "/1.zip"), new File(path));
                 Log.i("LocalFile", "unzip");
+                //标记已下载解压处理完成,下次不要重复.
+                SettingManager.get().setDownLoadZip(true);
             }
         });
     }

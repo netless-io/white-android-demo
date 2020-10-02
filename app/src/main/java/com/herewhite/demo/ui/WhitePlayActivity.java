@@ -1,4 +1,4 @@
-package com.herewhite.demo;
+package com.herewhite.demo.ui;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,20 +15,25 @@ import android.webkit.WebView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
+import com.herewhite.demo.DemoAPIv5;
+import com.herewhite.demo.R;
+import com.herewhite.demo.StartActivity;
 import com.herewhite.demo.exo.WhiteExoPlayer;
 import com.herewhite.demo.ijk.WhiteIjkPlayer;
 import com.herewhite.demo.ijk.widget.media.IjkVideoView;
-import com.herewhite.sdk.PlayerEventListener;
-import com.herewhite.sdk.combinePlayer.NativePlayer;
-import com.herewhite.sdk.combinePlayer.PlayerSyncManager;
 import com.herewhite.sdk.Player;
+import com.herewhite.sdk.PlayerEventListener;
 import com.herewhite.sdk.WhiteSdk;
 import com.herewhite.sdk.WhiteSdkConfiguration;
 import com.herewhite.sdk.WhiteboardView;
-import com.herewhite.sdk.domain.DeviceType;
+import com.herewhite.sdk.combinePlayer.NativePlayer;
+import com.herewhite.sdk.combinePlayer.PlayerSyncManager;
 import com.herewhite.sdk.domain.PlayerConfiguration;
 import com.herewhite.sdk.domain.PlayerPhase;
 import com.herewhite.sdk.domain.PlayerState;
@@ -41,7 +44,7 @@ import com.herewhite.sdk.domain.UrlInterrupter;
 
 import java.util.concurrent.TimeUnit;
 
-public class PlayActivity extends AppCompatActivity implements PlayerEventListener {
+public class WhitePlayActivity extends AppCompatActivity implements PlayerEventListener {
 
     protected WhiteboardView mWhiteboardView;
     @Nullable
@@ -128,22 +131,23 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
         return mPlayerSyncManager != null && mPlaybackPlayer != null && mWhiteMediaPlayer != null;
     }
 
-    public void play(android.view.View button) {
+    public void play(View button) {
         play();
     }
 
-    public void pause(android.view.View button) {
+    public void pause(View button) {
         pause();
     }
 
-    public void reset(android.view.View button) {
+    public void reset(View button) {
         seek(0L);
     }
 
     //region override
     protected void setupPlayer() {
         Intent intent = getIntent();
-        final String uuid = intent.getStringExtra(StartActivity.EXTRA_MESSAGE);
+        final String uuid = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE);
+        final String roomToken = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE_ROOMTOKEN);
 
         try {
             if (mIsUsedExoPlayer) {
@@ -178,25 +182,27 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
             Log.e(TAG_Native, "create fail");
         }
 
-        DemoAPIv5.Result result = new DemoAPIv5.Result() {
-            @Override
-            public void success(String uuid, String roomToken) {
-                initPlayer(uuid, roomToken);
-            }
+//        DemoAPIv5.Result result = new DemoAPIv5.Result() {
+//            @Override
+//            public void success(String uuid, String roomToken) {
+//                initPlayer(uuid, roomToken);
+//            }
+//
+//            @Override
+//            public void fail(String message) {
+//                alert("创建回放失败: ", message);
+//            }
+//        };
+//
+//        if (uuid != null) {
+//            demoAPI.getRoomToken(uuid, result);
+//        } else if (demoAPI.hasDemoInfo()) {
+//            demoAPI.getNewRoom("", result);
+//        } else {
+//            alert("无数据", "没有房间 uuid");
+//        }
 
-            @Override
-            public void fail(String message) {
-                alert("创建回放失败: ", message);
-            }
-        };
-
-        if (uuid != null) {
-            demoAPI.getRoomToken(uuid, result);
-        } else if (demoAPI.hasDemoInfo()) {
-            demoAPI.getNewRoom("", result);
-        } else {
-            alert("无数据", "没有房间 uuid");
-        }
+        initPlayer(uuid, roomToken);
     }
 
     void enableBtn() {
@@ -220,9 +226,9 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
     @SuppressLint("SourceLockedOrientationActivity")
     public void orientation(MenuItem item) {
         if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            WhitePlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            PlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            WhitePlayActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
@@ -365,11 +371,12 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
     protected void initPlayer(String uuid, String roomToken) {
         WhiteSdk whiteSdk = new WhiteSdk(
                 mWhiteboardView,
-                PlayActivity.this,
+                WhitePlayActivity.this,
                 new WhiteSdkConfiguration(demoAPI.getAppIdentifier(), true),
                 new UrlInterrupter() {
                     @Override
                     public String urlInterrupter(String sourceUrl) {
+                        Log.d(TAG, "initPlayer:urlInterrupter:" + sourceUrl);
                         return sourceUrl;
                     }
                 });
@@ -415,7 +422,7 @@ public class PlayActivity extends AppCompatActivity implements PlayerEventListen
 
         runOnUiThread(new Runnable() {
             public void run() {
-                AlertDialog alertDialog = new AlertDialog.Builder(PlayActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(WhitePlayActivity.this).create();
                 alertDialog.setTitle(title);
                 alertDialog.setMessage(detail);
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {

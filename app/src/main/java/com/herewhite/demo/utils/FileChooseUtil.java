@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 public class FileChooseUtil {
@@ -25,6 +26,21 @@ public class FileChooseUtil {
             util = new FileChooseUtil(context);
         }
         return util;
+    }
+
+    /**
+     * 获取文件名及后缀
+     */
+    public String getFileNameWithSuffix(String path) {
+        if(TextUtils.isEmpty(path)){
+            return "";
+        }
+        int start = path.lastIndexOf("/");
+        if (start != -1 ) {
+            return path.substring(start + 1);
+        } else {
+            return "";
+        }
     }
 
     /**

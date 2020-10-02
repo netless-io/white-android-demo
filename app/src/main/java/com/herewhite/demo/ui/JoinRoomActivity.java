@@ -22,6 +22,7 @@ public class JoinRoomActivity extends Activity implements View.OnClickListener, 
     private static final String TAG = "JoinRoomActivity";
     public static final String EXTRA_MESSAGE = "com.example.whiteSDKDemo.UUID";
     public static final String EXTRA_MESSAGE_ROOMTOKEN = "com.example.whiteSDKDemo.roomToken";
+    public static final String EXTRA_MESSAGE_M3U8 = "com.example.whiteSDKDemo.m3u8";
     public static final String EXTRA_MESSAGE_NAME = "com.example.whiteSDKDemo.name";
     private EditText mEditText;
     private EditText mSubEditText;

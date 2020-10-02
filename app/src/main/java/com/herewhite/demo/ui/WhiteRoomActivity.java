@@ -47,6 +47,7 @@ import com.alibaba.sdk.android.oss.model.PutObjectResult;
 import com.google.gson.Gson;
 import com.herewhite.demo.DemoAPIv5;
 import com.herewhite.demo.LocalFileWebViewClient;
+import com.herewhite.demo.PlayActivity;
 import com.herewhite.demo.R;
 import com.herewhite.demo.WhiteWebViewClient;
 import com.herewhite.demo.adapter.ColorSelectAdapter;
@@ -102,6 +103,10 @@ import java.util.Date;
 import java.util.HashMap;
 
 import wendu.dsbridge.DWebView;
+
+import static com.herewhite.demo.ui.JoinRoomActivity.EXTRA_MESSAGE;
+import static com.herewhite.demo.ui.JoinRoomActivity.EXTRA_MESSAGE_M3U8;
+import static com.herewhite.demo.ui.JoinRoomActivity.EXTRA_MESSAGE_ROOMTOKEN;
 
 
 public class WhiteRoomActivity extends Activity implements View.OnClickListener {
@@ -192,9 +197,9 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         whiteboardView.setWebViewClient(client);
         initView();
         Intent intent = getIntent();
-        String uuid = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE);
+        String uuid = intent.getStringExtra(EXTRA_MESSAGE);
         String name = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE_NAME);
-        String joinToken = intent.getStringExtra(JoinRoomActivity.EXTRA_MESSAGE_ROOMTOKEN);
+        String joinToken = intent.getStringExtra(EXTRA_MESSAGE_ROOMTOKEN);
 
         if (!TextUtils.isEmpty(name)) {
             SettingManager.get().setName(name);
@@ -639,9 +644,53 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         });
     }
 
+    public void staticConvert(String path) {
+        Converter c = new Converter(this.roomToken);
+        c.startConvertTask(path, Converter.ConvertType.Static, new ConverterCallbacks(){
+            @Override
+            public void onFailure(ConvertException e) {
+                logAction(e.getMessage());
+            }
+
+            @Override
+            public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
+                room.putScenes("/static", ppt.getScenes(), 0);
+                room.setScenePath("/static/1");
+                logAction(convertInfo.toString());
+            }
+
+            @Override
+            public void onProgress(Double progress, ConversionInfo convertInfo) {
+                logAction(String.valueOf(progress));
+            }
+        });
+    }
+
     public void dynamicConvert(MenuItem item) {
         Converter c = new Converter(this.roomToken);
         c.startConvertTask("https://white-cn-edge-doc-convert.oss-cn-hangzhou.aliyuncs.com/-1/1.pptx", Converter.ConvertType.Dynamic, new ConverterCallbacks(){
+            @Override
+            public void onFailure(ConvertException e) {
+                logAction(e.getMessage());
+            }
+
+            @Override
+            public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
+                room.putScenes("/dynamic", ppt.getScenes(), 0);
+                room.setScenePath("/dynamic/1");
+                logAction(convertInfo.toString());
+            }
+
+            @Override
+            public void onProgress(Double progress, ConversionInfo convertInfo) {
+                logAction(String.valueOf(progress));
+            }
+        });
+    }
+
+    public void dynamicConvert(String path) {
+        Converter c = new Converter(this.roomToken);
+        c.startConvertTask(path, Converter.ConvertType.Dynamic, new ConverterCallbacks(){
             @Override
             public void onFailure(ConvertException e) {
                 logAction(e.getMessage());
@@ -978,7 +1027,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 showShare();
                 break;
             case R.id.topbar_exit:
-                finish();
+                showExit();
                 break;
 
             case R.id.bottombar_1:
@@ -1497,6 +1546,57 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         mShowViewRe.addView(view, params);
     }
 
+    private void showExit() {
+        mShowViewRe.removeAllViews();
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_exit, null);
+
+        View viewBg = view.findViewById(R.id.showview_bg);
+        viewBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        View viewClose = view.findViewById(R.id.close);
+        SelectUtil.setSelect(viewClose);
+        viewClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+        View viewExit = view.findViewById(R.id.btn_exit);
+        viewExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                finish();
+            }
+        });
+
+        View viewReplay = view.findViewById(R.id.img_replay);
+        SelectUtil.setSelect(viewReplay);
+        viewReplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+                Intent intent = new Intent(WhiteRoomActivity.this, WhitePlayActivity.class);
+
+                if (uuid.length() > 0) {
+                    intent.putExtra(EXTRA_MESSAGE, uuid);
+                    intent.putExtra(EXTRA_MESSAGE_ROOMTOKEN, roomToken);
+                    intent.putExtra(EXTRA_MESSAGE_M3U8, "");
+                }
+
+                startActivity(intent);
+            }
+        });
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mShowViewRe.addView(view, params);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1504,8 +1604,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             Log.d(TAG, "onActivityResult:requestCode" + requestCode);
             Uri uri = data.getData();
             String chooseFilePath = FileChooseUtil.getInstance(this).getChooseFileResultPath(uri);
-            Log.d(TAG, "chooseFilePath：" + chooseFilePath);
-            String remotePath = "file_" + System.currentTimeMillis();
+            String remotePath = "file_" + System.currentTimeMillis() + "_" + FileChooseUtil.getInstance(this).getFileNameWithSuffix(chooseFilePath);
+            Log.d(TAG, "chooseFilePath：" + chooseFilePath + ",remotePath:" + remotePath);
             AliOssSdkManager.get().upLoad(remotePath, chooseFilePath, new OSSProgressCallback<PutObjectRequest>() {
                 @Override
                 public void onProgress(PutObjectRequest request, long currentSize, long totalSize) {
@@ -1533,14 +1633,19 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                         }
                     });
 
-                    if (requestCode == 1) {
+                    if (requestCode == 1 || requestCode == 2 || requestCode == 3) {
                         mUploadProgress.post(new Runnable() {
                             @Override
                             public void run() {
                                 room.insertImage(new ImageInformationWithUrl(0d, 0d, 200d, 200d, urlpath));
                             }
                         });
-
+                    }
+                    if (requestCode == 4) {
+                        dynamicConvert(urlpath);
+                    }
+                    if (requestCode == 5) {
+                        staticConvert(urlpath);
                     }
                 }
 

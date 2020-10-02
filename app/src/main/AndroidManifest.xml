@@ -30,6 +30,11 @@
         <activity
             android:name=".ui.SelectActivity"
             android:theme="@style/FullscreenTheme" />
+
+        <activity
+            android:name=".ui.WhitePlayActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_play" />
         <activity
             android:name=".PureReplayActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"

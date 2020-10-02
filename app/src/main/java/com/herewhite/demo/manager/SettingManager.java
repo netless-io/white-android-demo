@@ -12,6 +12,7 @@ public class SettingManager {
     private final static String TAG = "SettingManager";
 
     public static final String SETTING_NAME = "name";
+    public static final String SETTING_DOWNLOAD_ZIP = "download_zip";
 
 
     private SharedPreferences mShare;
@@ -20,18 +21,19 @@ public class SettingManager {
 
     private boolean mInitialized = false;
     private String mName;
+    private boolean mDownLoadZip;
 
-    private static SettingManager sTpe;
+    private static SettingManager sSettingManager;
 
     public static SettingManager get() {
-        if (sTpe == null) {
+        if (sSettingManager == null) {
             synchronized (SettingManager.class) {
-                if (sTpe == null) {
-                    sTpe = new SettingManager();
+                if (sSettingManager == null) {
+                    sSettingManager = new SettingManager();
                 }
             }
         }
-        return sTpe;
+        return sSettingManager;
     }
 
     private SettingManager() {
@@ -44,6 +46,8 @@ public class SettingManager {
             return true;
         }
         mName = mShare.getString(SETTING_NAME, null);
+        mDownLoadZip = mShare.getBoolean(SETTING_DOWNLOAD_ZIP, false);
+        mInitialized = true;
         return true;
     }
 
@@ -56,5 +60,15 @@ public class SettingManager {
     public void setName(String name) {
         mName = name;
         mShare.edit().putString(SETTING_NAME, name).apply();
+    }
+
+    public boolean getDownLoadZip() {
+        initialize();
+        return mDownLoadZip;
+    }
+
+    public void setDownLoadZip(boolean bool) {
+        mDownLoadZip = bool;
+        mShare.edit().putBoolean(SETTING_DOWNLOAD_ZIP, bool).apply();
     }
 }
