@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -101,6 +102,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import wendu.dsbridge.DWebView;
 
@@ -1022,7 +1024,9 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     showToast(getString(R.string.freedom_info));
                 }
                 break;
-            case R.id.topbar_folder:break;
+            case R.id.topbar_folder:
+                showFolder();
+                break;
             case R.id.topbar_share:
                 showShare();
                 break;
@@ -1297,6 +1301,89 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         pageList.setAdapter(pageSelectAdapter);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         mShowViewRe.addView(view, params);
+    }
+
+    private void showFolder() {
+        mShowViewRe.removeAllViews();
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_folder, null);
+
+        View viewBg = view.findViewById(R.id.showview_bg);
+        viewBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowViewRe.removeAllViews();
+            }
+        });
+
+        GridView pageList = view.findViewById(R.id.showview_folder_list);
+        PageSelectAdapter pageSelectAdapter = new PageSelectAdapter(this);
+        pageSelectAdapter.setListener(new PageSelectAdapter.OnPreviewItemClick() {
+            @Override
+            public void onPreviewImgClick(int position) {
+                int size = room.getSceneState().getScenes().length - 1;
+                if (position > size) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
+                room.setSceneIndex(position, new Promise<Boolean>() {
+                    @Override
+                    public void then(Boolean result) {
+                        if (result != null && result == true) {
+                            pageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                            pageSelectAdapter.setList(room.getScenes());
+                            pageSelectAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void catchEx(SDKError t) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onPreviewDelClick(int position) {
+                int size = room.getSceneState().getScenes().length - 1;
+                if (position > size) {
+                    return;
+                }
+                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
+                room.removeScenes("/" + room.getSceneState().getScenes()[position].getName());
+                pageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                pageSelectAdapter.setList(room.getScenes());
+                pageSelectAdapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void getBitmap(int position, Promise<Bitmap> promise) {
+                try {
+                    String path = "/" + room.getSceneState().getScenes()[position].getName();
+                    room.getScenePreviewImage(path, promise);
+                } catch (Exception e) {
+                    Log.w(TAG, "getBitmap fail:" + e);
+                }
+            }
+        });
+        pageSelectAdapter.setList(room.getScenes());
+        pageList.setAdapter(pageSelectAdapter);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mShowViewRe.addView(view, params);
+
+        room.getEntireScenes(new Promise<Map<String, Scene[]>>() {
+            @Override
+            public void then(Map<String, Scene[]> stringMap) {
+                for (Map.Entry<String, Scene[]> entry : stringMap.entrySet()) {
+                    Log.d(TAG, "Key = " + entry.getKey() + ", Value = " + entry.getValue());
+                }
+            }
+
+            @Override
+            public void catchEx(SDKError t) {
+                Log.e(TAG, "getEntireScenes fail:" + t);
+            }
+        });
     }
 
     private void showRectangleSelect() {
