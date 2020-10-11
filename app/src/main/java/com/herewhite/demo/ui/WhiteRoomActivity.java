@@ -30,12 +30,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
@@ -52,6 +55,7 @@ import com.herewhite.demo.PlayActivity;
 import com.herewhite.demo.R;
 import com.herewhite.demo.WhiteWebViewClient;
 import com.herewhite.demo.adapter.ColorSelectAdapter;
+import com.herewhite.demo.adapter.FolderSelectAdapter;
 import com.herewhite.demo.adapter.PageSelectAdapter;
 import com.herewhite.demo.manager.AliOssSdkManager;
 import com.herewhite.demo.manager.SettingManager;
@@ -111,7 +115,7 @@ import static com.herewhite.demo.ui.JoinRoomActivity.EXTRA_MESSAGE_M3U8;
 import static com.herewhite.demo.ui.JoinRoomActivity.EXTRA_MESSAGE_ROOMTOKEN;
 
 
-public class WhiteRoomActivity extends Activity implements View.OnClickListener {
+public class WhiteRoomActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "WhiteRoomActivity";
     /** 和 iOS 名字一致 */
     final String EVENT_NAME = "WhiteCommandCustomEvent";
@@ -132,6 +136,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     private CirclePointView mTopbar_ColorSelect;
     private TextView mTopbar_scaling;
     private TextView mTopbar_pages;
+    private ImageView mImg_topbar_first;
+    private ImageView mImg_topbar_previous;
+    private ImageView mImg_topbar_next;
+    private ImageView mImg_topbar_last;
     private View mBottomBar;
     private View mBottomIcon;
     private LinearLayout mShowViewRe;
@@ -141,6 +149,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
     private PopupWindow mColorPopuWindow;
     private NoScrollGridView mColorGridView;
     private ColorSelectAdapter mColorSelectAdapter;
+    private PageSelectAdapter mPageSelectAdapter;
+    private FolderSelectAdapter mFolderSelectAdapter;
 
     private ProgressBar mUploadProgress;
 
@@ -218,11 +228,11 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         mTopbar_ColorSelect = (CirclePointView) setListener(R.id.topbar_color);
         mTopbar_scaling = findViewById(R.id.topbar_scaling);
         setListener(R.id.topbar_preview);
-        setListener(R.id.topbar_first);
-        setListener(R.id.topbar_previous);
+        mImg_topbar_first = (ImageView) setListener(R.id.topbar_first);
+        mImg_topbar_previous = (ImageView) setListener(R.id.topbar_previous);
         mTopbar_pages = findViewById(R.id.topbar_pages);
-        setListener(R.id.topbar_next);
-        setListener(R.id.topbar_last);
+        mImg_topbar_next = (ImageView) setListener(R.id.topbar_next);
+        mImg_topbar_last = (ImageView) setListener(R.id.topbar_last);
         setListener(R.id.topbar_follow);
         setListener(R.id.topbar_folder);
         setListener(R.id.topbar_share);
@@ -247,6 +257,11 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
         mTopbar_scaling.setText("100%");
         mTopbar_pages.setText("1/1");
+        mImg_topbar_first.setImageResource(R.mipmap.ic_topbar_first_select);
+        mImg_topbar_previous.setImageResource(R.mipmap.ic_topbar_previous_select);
+        mImg_topbar_next.setImageResource(R.mipmap.ic_topbar_next_select);
+        mImg_topbar_last.setImageResource(R.mipmap.ic_topbar_last_select);
+
         mColorArr = getResources().getIntArray(R.array.color_arr);
         mLastColor = mColorArr[0];
         mLastTextSize = 10;
@@ -386,6 +401,32 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     );
                     if (modifyState.getZoomScale() != null){
                         mTopbar_scaling.setText( (int)(modifyState.getZoomScale().doubleValue() * 100) + "%" );
+                    }
+                    if (modifyState.getSceneState() != null) {
+                        //更新页码和预览弹窗
+                        updatePages();
+                        room.getEntireScenes(new Promise<Map<String, Scene[]>>() {
+                            @Override
+                            public void then(Map<String, Scene[]> stringMap) {
+                                try {
+                                    if (mFolderSelectAdapter != null) {
+                                        String currPath = room.getSceneState().getScenePath();
+                                        int findIndex = currPath.lastIndexOf("/") ==0 ? 1: currPath.lastIndexOf("/");
+                                        String basePath = currPath.substring(0, findIndex);
+                                        mFolderSelectAdapter.setIndex(basePath);
+                                        mFolderSelectAdapter.setMap(stringMap);
+                                        mFolderSelectAdapter.notifyDataSetChanged();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void catchEx(SDKError t) {
+
+                            }
+                        });
                     }
                 }
                 logRoomInfo(gson.toJson(modifyState));
@@ -912,6 +953,36 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
 
     //endregion
 
+    private void updatePages() {
+        int index = room.getSceneState().getIndex() + 1;
+        int size = room.getScenes().length;
+        Log.d(TAG, "updatePages:" + index + "," + size);
+        mTopbar_pages.setText("" + index + "/" + room.getScenes().length);
+        if (index == 1) {
+            mImg_topbar_first.setImageResource(R.mipmap.ic_topbar_first_select);
+            mImg_topbar_previous.setImageResource(R.mipmap.ic_topbar_previous_select);
+        } else {
+            mImg_topbar_first.setImageResource(R.mipmap.ic_topbar_first);
+            mImg_topbar_previous.setImageResource(R.mipmap.ic_topbar_previous);
+        }
+        if (index == size) {
+            mImg_topbar_next.setImageResource(R.mipmap.ic_topbar_next_select);
+            mImg_topbar_last.setImageResource(R.mipmap.ic_topbar_last_select);
+        } else {
+            mImg_topbar_next.setImageResource(R.mipmap.ic_topbar_next);
+            mImg_topbar_last.setImageResource(R.mipmap.ic_topbar_last);
+        }
+        try {
+            if (mPageSelectAdapter != null) {
+                mPageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                mPageSelectAdapter.setList(room.getScenes());
+                mPageSelectAdapter.notifyDataSetChanged();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onClick(View v) {
         if (room == null) {
@@ -1221,10 +1292,11 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 int size = room.getSceneState().getScenes().length;
                 long name = System.currentTimeMillis();
                 String currPath = room.getSceneState().getScenePath();
+                String basePath = currPath.substring(0, currPath.lastIndexOf("/") + 1);
                 Log.d(TAG, "add page currPath:" + currPath);
-                room.putScenes("/", new Scene[]{
+                room.putScenes(basePath, new Scene[]{
                         new Scene("page" + name)}, size);
-                room.setScenePath( "/page" + name);
+                room.setScenePath( basePath + "page" + name);
                 room.getScenes(new Promise<Scene[]>() {
                     @Override
                     public void then(Scene[] scenes) {
@@ -1247,8 +1319,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
         });
 
         ListView pageList = view.findViewById(R.id.showview_preview_list);
-        PageSelectAdapter pageSelectAdapter = new PageSelectAdapter(this);
-        pageSelectAdapter.setListener(new PageSelectAdapter.OnPreviewItemClick() {
+        mPageSelectAdapter = new PageSelectAdapter(this);
+        mPageSelectAdapter.setListener(new PageSelectAdapter.OnPreviewItemClick() {
             @Override
             public void onPreviewImgClick(int position) {
                 int size = room.getSceneState().getScenes().length - 1;
@@ -1260,9 +1332,9 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     @Override
                     public void then(Boolean result) {
                         if (result != null && result == true) {
-                            pageSelectAdapter.setIndex(room.getSceneState().getIndex());
-                            pageSelectAdapter.setList(room.getScenes());
-                            pageSelectAdapter.notifyDataSetChanged();
+                            mPageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                            mPageSelectAdapter.setList(room.getScenes());
+                            mPageSelectAdapter.notifyDataSetChanged();
                         }
                     }
 
@@ -1280,103 +1352,95 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                     return;
                 }
                 mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
-                room.removeScenes("/" + room.getSceneState().getScenes()[position].getName());
-                pageSelectAdapter.setIndex(room.getSceneState().getIndex());
-                pageSelectAdapter.setList(room.getScenes());
-                pageSelectAdapter.notifyDataSetChanged();
+                String currPath = room.getSceneState().getScenePath();
+                String basePath = currPath.substring(0, currPath.lastIndexOf("/") + 1);
+                room.removeScenes(basePath + room.getSceneState().getScenes()[position].getName());
+                mPageSelectAdapter.setIndex(room.getSceneState().getIndex());
+                mPageSelectAdapter.setList(room.getScenes());
+                mPageSelectAdapter.notifyDataSetChanged();
 
             }
 
             @Override
             public void getBitmap(int position, Promise<Bitmap> promise) {
                 try {
-                    String path = "/" + room.getSceneState().getScenes()[position].getName();
+                    String currPath = room.getSceneState().getScenePath();
+                    String basePath = currPath.substring(0, currPath.lastIndexOf("/") + 1);
+                    String path = basePath + room.getSceneState().getScenes()[position].getName();
                     room.getScenePreviewImage(path, promise);
                 } catch (Exception e) {
                     Log.w(TAG, "getBitmap fail:" + e);
                 }
             }
         });
-        pageSelectAdapter.setList(room.getScenes());
-        pageList.setAdapter(pageSelectAdapter);
+        mPageSelectAdapter.setList(room.getScenes());
+        mPageSelectAdapter.setIndex(room.getSceneState().getIndex());
+        pageList.setAdapter(mPageSelectAdapter);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         mShowViewRe.addView(view, params);
     }
 
     private void showFolder() {
-        mShowViewRe.removeAllViews();
-        View view = LayoutInflater.from(this).inflate(R.layout.layout_showview_folder, null);
-
-        View viewBg = view.findViewById(R.id.showview_bg);
-        viewBg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mShowViewRe.removeAllViews();
-            }
-        });
-
-        GridView pageList = view.findViewById(R.id.showview_folder_list);
-        PageSelectAdapter pageSelectAdapter = new PageSelectAdapter(this);
-        pageSelectAdapter.setListener(new PageSelectAdapter.OnPreviewItemClick() {
-            @Override
-            public void onPreviewImgClick(int position) {
-                int size = room.getSceneState().getScenes().length - 1;
-                if (position > size) {
-                    return;
-                }
-                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
-                room.setSceneIndex(position, new Promise<Boolean>() {
-                    @Override
-                    public void then(Boolean result) {
-                        if (result != null && result == true) {
-                            pageSelectAdapter.setIndex(room.getSceneState().getIndex());
-                            pageSelectAdapter.setList(room.getScenes());
-                            pageSelectAdapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void catchEx(SDKError t) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onPreviewDelClick(int position) {
-                int size = room.getSceneState().getScenes().length - 1;
-                if (position > size) {
-                    return;
-                }
-                mTopbar_pages.setText("" + (position + 1) + "/" + room.getScenes().length);
-                room.removeScenes("/" + room.getSceneState().getScenes()[position].getName());
-                pageSelectAdapter.setIndex(room.getSceneState().getIndex());
-                pageSelectAdapter.setList(room.getScenes());
-                pageSelectAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void getBitmap(int position, Promise<Bitmap> promise) {
-                try {
-                    String path = "/" + room.getSceneState().getScenes()[position].getName();
-                    room.getScenePreviewImage(path, promise);
-                } catch (Exception e) {
-                    Log.w(TAG, "getBitmap fail:" + e);
-                }
-            }
-        });
-        pageSelectAdapter.setList(room.getScenes());
-        pageList.setAdapter(pageSelectAdapter);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        mShowViewRe.addView(view, params);
-
         room.getEntireScenes(new Promise<Map<String, Scene[]>>() {
             @Override
             public void then(Map<String, Scene[]> stringMap) {
                 for (Map.Entry<String, Scene[]> entry : stringMap.entrySet()) {
                     Log.d(TAG, "Key = " + entry.getKey() + ", Value = " + entry.getValue());
                 }
+
+                mShowViewRe.removeAllViews();
+                View view = LayoutInflater.from(WhiteRoomActivity.this).inflate(R.layout.layout_showview_folder, null);
+
+                View viewBg = view.findViewById(R.id.showview_bg);
+                viewBg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mShowViewRe.removeAllViews();
+                    }
+                });
+
+                GridView pageList = view.findViewById(R.id.showview_folder_list);
+                mFolderSelectAdapter = new FolderSelectAdapter(WhiteRoomActivity.this);
+                mFolderSelectAdapter.setListener(new FolderSelectAdapter.OnPreviewItemClick() {
+                    @Override
+                    public void onPreviewImgClick(int position, String key, Scene[] scenes) {
+                        String localkey = key;
+                        if (key.equals("/")) {
+                            localkey = "";
+                        }
+                        room.setScenePath(localkey + "/" + scenes[0].getName());
+                    }
+
+                    @Override
+                    public void onPreviewDelClick(int position, String key, Scene[] scenes) {
+                        room.removeScenes(key);
+                    }
+
+                    @Override
+                    public void getBitmap(int position, String key, Scene[] scenes, Promise<Bitmap> promise) {
+                        try {
+                            String localkey = key;
+                            if (key.equals("/")) {
+                                localkey = "";
+                            }
+                            String path = localkey +  "/" + scenes[0].getName();
+                            room.getScenePreviewImage(path, promise);
+                        } catch (Exception e) {
+                            Log.w(TAG, "getBitmap fail:" + e);
+                        }
+                    }
+
+
+                });
+                mFolderSelectAdapter.setMap(stringMap);
+                String currPath = room.getSceneState().getScenePath();
+                int findIndex = currPath.lastIndexOf("/") ==0 ? 1: currPath.lastIndexOf("/");
+                String basePath = currPath.substring(0, findIndex);
+                mFolderSelectAdapter.setIndex(basePath);
+                pageList.setAdapter(mFolderSelectAdapter);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                mShowViewRe.addView(view, params);
+
             }
 
             @Override
@@ -1384,6 +1448,10 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 Log.e(TAG, "getEntireScenes fail:" + t);
             }
         });
+
+
+
+
     }
 
     private void showRectangleSelect() {
@@ -1570,8 +1638,8 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 startActivityForResult(intent, 1);
             }
         });
-
-        viewRe = view.findViewById(R.id.upload_video_re);
+//android端暂时不支持插入视频和音频,屏蔽入口
+/*        viewRe = view.findViewById(R.id.upload_video_re);
         SelectUtil.setSelect(viewRe);
         viewRe.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1595,7 +1663,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent, 3);
             }
-        });
+        });*/
 
         viewRe = view.findViewById(R.id.data_to_web_re);
         SelectUtil.setSelect(viewRe);
@@ -1668,7 +1736,7 @@ public class WhiteRoomActivity extends Activity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
                 mShowViewRe.removeAllViews();
-                Intent intent = new Intent(WhiteRoomActivity.this, WhitePlayActivity.class);
+                Intent intent = new Intent(WhiteRoomActivity.this, WhiteReplayActivity.class);
 
                 if (uuid.length() > 0) {
                     intent.putExtra(EXTRA_MESSAGE, uuid);

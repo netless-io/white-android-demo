@@ -132,4 +132,10 @@
     <string name="exit_this_room">确认退出</string>
     <string name="jump_to_replay">查看回放</string>
     <string name="document_center">文档中心</string>
+    <string name="play_speed">倍速</string>
+    <string name="folder_first">白板页</string>
+    <string name="folder_static">静态</string>
+    <string name="folder_dynamic">动态</string>
+    <string name="folder_unknow">未知</string>
+
 </resources>

@@ -21,7 +21,7 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ui.WhiteRoomActivity"
-            android:theme="@style/FullscreenTheme"/>
+            android:theme="@style/FullscreenAppTheme"/>
         <activity android:name=".ui.CreateRoomActivity"
             android:theme="@style/FullscreenTheme"/>
         <activity
@@ -30,11 +30,10 @@
         <activity
             android:name=".ui.SelectActivity"
             android:theme="@style/FullscreenTheme" />
-
         <activity
-            android:name=".ui.WhitePlayActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_play" />
+            android:name=".ui.WhiteReplayActivity"
+            android:theme="@style/FullscreenAppTheme"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".PureReplayActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
@@ -53,7 +52,6 @@
         <activity
             android:name=".ui.WelcomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_welcome"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

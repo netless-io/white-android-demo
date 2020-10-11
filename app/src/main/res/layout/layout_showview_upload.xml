@@ -59,8 +59,8 @@
             android:background="#E7E7E7"
             android:layout_centerHorizontal="true"
             />
-
-        <RelativeLayout
+<!--android端暂不支持插入音频和视频-->
+ <!--       <RelativeLayout
             android:id="@+id/upload_video_re"
             android:layout_marginTop="10dp"
             android:minWidth="150dp"
@@ -146,14 +146,14 @@
             android:layout_height="1dp"
             android:background="#E7E7E7"
             android:layout_centerHorizontal="true"
-            />
+            />-->
 
         <RelativeLayout
             android:id="@+id/data_to_web_re"
             android:layout_marginTop="10dp"
             android:minWidth="150dp"
             android:minHeight="80dp"
-            android:layout_below="@+id/upload_media_re_line"
+            android:layout_below="@+id/upload_pic_re_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 

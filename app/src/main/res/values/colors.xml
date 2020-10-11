@@ -6,6 +6,7 @@
 
     <color name="white_for_colorselect">#EEEEEE</color>
     <color name="white_overlay">#FFFFFFFF</color>
+    <color name="white_default">#FF71C3FC</color>
 
     <color name="color_slect_1">#FC3A3F</color>
     <color name="color_slect_2">#FD8343</color>
