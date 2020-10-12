@@ -107,6 +107,8 @@ public class WhiteReplayActivity extends AppCompatActivity implements PlayerEven
 
 
         WebView.setWebContentsDebuggingEnabled(true);
+        whiteboardView.setBackgroundColor(0);
+        whiteboardView.getBackground().setAlpha(0);
         //是否开启 httpDns
         useHttpDnsService(false);
         setupPlayer();
@@ -517,5 +519,12 @@ public class WhiteReplayActivity extends AppCompatActivity implements PlayerEven
             return speedlist[position];
         }
         return 1.0f;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        whiteboardView.removeAllViews();
+        whiteboardView.destroy();
     }
 }

@@ -697,8 +697,9 @@ public class WhiteRoomActivity extends AppCompatActivity implements View.OnClick
 
             @Override
             public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
-                room.putScenes("/static", ppt.getScenes(), 0);
-                room.setScenePath("/static/1");
+                long time = System.currentTimeMillis();
+                room.putScenes("/static" + time, ppt.getScenes(), 0);
+                room.setScenePath("/static"+ time + "/1");
                 logAction(convertInfo.toString());
             }
 
@@ -741,8 +742,9 @@ public class WhiteRoomActivity extends AppCompatActivity implements View.OnClick
 
             @Override
             public void onFinish(ConvertedFiles ppt, ConversionInfo convertInfo) {
-                room.putScenes("/dynamic", ppt.getScenes(), 0);
-                room.setScenePath("/dynamic/1");
+                long time = System.currentTimeMillis();
+                room.putScenes("/dynamic" + time, ppt.getScenes(), 0);
+                room.setScenePath("/dynamic" + time + "/1" );
                 logAction(convertInfo.toString());
             }
 
