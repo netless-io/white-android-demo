@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#FFF4F4F4"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/bottombar"
+        android:background="@color/white_overlay"
+        android:layout_margin="4dp"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/info_bar"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/play_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/video_play"/>
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:typeface="monospace"
+                android:textColor="#7A7B7C"
+                android:layout_toRightOf="@+id/play_action"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/play_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="@string/play_speed"/>
+        </RelativeLayout>
+
+        <SeekBar
+            android:id="@+id/player_seek_bar"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_below="@+id/info_bar"
+            android:progressDrawable="@drawable/layer_list_seekbar"
+            android:thumb="@drawable/seekbar_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_play"
+                android:onClick="play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/play" />
+
+            <Button
+                android:id="@+id/button_pause"
+                android:onClick="pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/pause" />
+
+            <Button
+                android:id="@+id/button_reset"
+                android:onClick="reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/rest" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+
+    <com.herewhite.sdk.WhiteboardView
+        android:id="@+id/white"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:background="#FFF4F4F4"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/bottombar"/>
+
+
+    <RelativeLayout
+        android:id="@+id/close"
+        android:layout_margin="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <com.herewhite.demo.widget.CirclePointView
+            android:id="@+id/color_border"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_centerInParent="true"
+            android:alpha="0.9"
+            app:isSolid="true"
+            app:pointColor="@color/white_overlay"
+            app:strikeWidth="2dp"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/ic_close"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/showview_group"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showview_bg"
+    android:background="#77F4F4F4"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/title_re"
+        android:background="@color/white_overlay"
+        android:layout_width="250dp"
+        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="@string/document_center"
+            android:padding="8dp"
+            />
+    </RelativeLayout>
+
+
+    <GridView
+        android:id="@+id/showview_folder_list"
+        android:layout_below="@+id/title_re"
+        android:layout_width="250dp"
+        android:numColumns="2"
+        android:layout_alignParentRight="true"
+        android:listSelector="@android:color/transparent"
+        android:background="@color/white_overlay"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

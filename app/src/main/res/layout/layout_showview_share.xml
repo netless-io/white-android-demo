@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showview_bg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#99F4F4F4">
+
+    <RelativeLayout
+        android:id="@+id/dialog_re"
+        android:layout_centerInParent="true"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:background="@color/white_overlay">
+
+        <RelativeLayout
+            android:id="@+id/title_re"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/invite_members"
+                android:textColor="#212324" />
+
+            <ImageView
+                android:id="@+id/close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/ic_close" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/show_uuid"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title_re">
+
+            <TextView
+                android:id="@+id/title_uuid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="@string/room_uuid" />
+
+            <EditText
+                android:id="@+id/edittext_uuid"
+                android:layout_width="157dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:singleLine="true"
+                android:background="@drawable/edittext_bg" />
+
+            <ImageView
+                android:id="@+id/cp_uuid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_copy" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/show_link"
+            android:layout_marginTop="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/show_uuid">
+
+            <TextView
+                android:id="@+id/title_link"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/add_link" />
+
+            <EditText
+                android:id="@+id/edittext_link"
+                android:layout_width="157dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:singleLine="true"
+                android:background="@drawable/edittext_bg" />
+
+            <ImageView
+                android:id="@+id/cp_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_copy" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_copy_all"
+            android:layout_width="184dp"
+            android:layout_height="40dp"
+            android:layout_below="@+id/show_link"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_select"
+            android:text="@string/copy"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

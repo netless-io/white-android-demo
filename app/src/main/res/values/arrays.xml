@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="speed_arr">
+        <item>2.0x</item>
+        <item>1.5x</item>
+        <item>1.25x</item>
+        <item>1.0x</item>
+        <item>0.75x</item>
+        <item>0.5x</item>
+    </string-array>
+
+    <array name="color_arr">
+        <item>@color/color_slect_1</item>
+        <item>@color/color_slect_2</item>
+        <item>@color/color_slect_3</item>
+        <item>@color/color_slect_4</item>
+        <item>@color/color_slect_5</item>
+        <item>@color/color_slect_6</item>
+        <item>@color/color_slect_7</item>
+        <item>@color/color_slect_8</item>
+        <item>@color/color_slect_9</item>
+        <item>@color/color_slect_10</item>
+        <item>@color/color_slect_11</item>
+        <item>@color/color_slect_12</item>
+    </array>
+
+    <array name="appliance_arr">
+        <item>@id/bottombar_1</item>
+        <item>@id/bottombar_2</item>
+        <item>@id/bottombar_3</item>
+        <item>@id/bottombar_4</item>
+        <item>@id/bottombar_5</item>
+        <item>@id/bottombar_6</item>
+        <item>@id/bottombar_7</item>
+        <item>@id/bottombar_8</item>
+    </array>
+
+    <array name="drawable_arr">
+        <item>@mipmap/ic_bottombar_1</item>
+        <item>@mipmap/ic_bottombar_2</item>
+        <item>@mipmap/ic_bottombar_3</item>
+        <item>@mipmap/ic_bottombar_4</item>
+        <item>@mipmap/ic_bottombar_5</item>
+        <item>@mipmap/ic_bottombar_6</item>
+        <item>@mipmap/ic_bottombar_7</item>
+        <item>@mipmap/ic_bottombar_8</item>
+    </array>
+
+    <array name="drawable_select_arr">
+        <item>@mipmap/ic_bottombar_1_select</item>
+        <item>@mipmap/ic_bottombar_2_select</item>
+        <item>@mipmap/ic_bottombar_3_select</item>
+        <item>@mipmap/ic_bottombar_4_select</item>
+        <item>@mipmap/ic_bottombar_5_select</item>
+        <item>@mipmap/ic_bottombar_6_select</item>
+        <item>@mipmap/ic_bottombar_7_select</item>
+        <item>@mipmap/ic_bottombar_8_select</item>
+    </array>
+</resources>

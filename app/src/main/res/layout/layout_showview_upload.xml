@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showview_bg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#99F4F4F4">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_centerInParent="true">
+    <RelativeLayout
+        android:id="@+id/dialog_re"
+        android:layout_centerInParent="true"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:background="@color/white_overlay">
+
+        <RelativeLayout
+            android:id="@+id/upload_pic_re"
+            android:minWidth="150dp"
+            android:minHeight="80dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/upload_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_pic"
+                android:textColor="#212324" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_pic_info"
+                android:layout_below="@+id/upload_pic"
+                android:textColor="#7A7B7C" />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/img" />
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/upload_pic_re_line"
+            android:layout_below="@+id/upload_pic_re"
+            android:padding="10dp"
+            android:layout_width="110dp"
+            android:layout_height="1dp"
+            android:background="#E7E7E7"
+            android:layout_centerHorizontal="true"
+            />
+<!--android端暂不支持插入音频和视频-->
+ <!--       <RelativeLayout
+            android:id="@+id/upload_video_re"
+            android:layout_marginTop="10dp"
+            android:minWidth="150dp"
+            android:minHeight="80dp"
+            android:layout_below="@+id/upload_pic_re_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/upload_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_video"
+                android:textColor="#212324" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_video_info"
+                android:layout_below="@+id/upload_video"
+                android:textColor="#7A7B7C" />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/video" />
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/upload_video_re_line"
+            android:layout_below="@+id/upload_video_re"
+            android:padding="10dp"
+            android:layout_width="110dp"
+            android:layout_height="1dp"
+            android:background="#E7E7E7"
+            android:layout_centerHorizontal="true"
+            />
+
+        <RelativeLayout
+            android:id="@+id/upload_media_re"
+            android:layout_marginTop="10dp"
+            android:minWidth="150dp"
+            android:minHeight="80dp"
+            android:layout_below="@+id/upload_video_re_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/upload_media"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_media"
+                android:textColor="#212324" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/upload_media_info"
+                android:layout_below="@+id/upload_media"
+                android:textColor="#7A7B7C" />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/audio" />
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/upload_media_re_line"
+            android:layout_below="@+id/upload_media_re"
+            android:padding="10dp"
+            android:layout_width="110dp"
+            android:layout_height="1dp"
+            android:background="#E7E7E7"
+            android:layout_centerHorizontal="true"
+            />-->
+
+        <RelativeLayout
+            android:id="@+id/data_to_web_re"
+            android:layout_marginTop="10dp"
+            android:minWidth="150dp"
+            android:minHeight="80dp"
+            android:layout_below="@+id/upload_pic_re_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/data_to_web"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/data_to_web"
+                android:textColor="#212324" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/data_to_web_info"
+                android:layout_below="@+id/data_to_web"
+                android:textColor="#7A7B7C" />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/filetransweb" />
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/data_to_web_re_line"
+            android:layout_below="@+id/data_to_web_re"
+            android:padding="10dp"
+            android:layout_width="110dp"
+            android:layout_height="1dp"
+            android:background="#E7E7E7"
+            android:layout_centerHorizontal="true"
+            />
+
+        <RelativeLayout
+            android:id="@+id/doc_to_pic_re"
+            android:layout_marginTop="10dp"
+            android:minWidth="150dp"
+            android:minHeight="80dp"
+            android:layout_below="@+id/data_to_web_re_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/doc_to_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/doc_to_pic"
+                android:textColor="#212324" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="@string/doc_to_pic_info"
+                android:layout_below="@+id/doc_to_pic"
+                android:textColor="#7A7B7C" />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/filetransimg" />
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+    </ScrollView>
+</RelativeLayout>

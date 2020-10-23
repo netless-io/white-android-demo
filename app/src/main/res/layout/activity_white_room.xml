@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#FFF4F4F4"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.WhiteRoomActivity">
+
+    <com.herewhite.sdk.WhiteboardView
+        android:id="@+id/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF4F4F4"
+        android:visibility="visible" />
+
+    <HorizontalScrollView
+        android:id="@+id/top_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:scrollbars="none"
+        android:minHeight="24dp"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white_overlay">
+
+            <ImageView
+                android:id="@+id/topbar_revoke"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_revoke"/>
+
+            <ImageView
+                android:id="@+id/topbar_cancelrevoke"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_cancelrevoke"/>
+
+            <ImageView
+                android:id="@+id/topbar_location"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_location"/>
+
+            <com.herewhite.demo.widget.CirclePointView
+                android:id="@+id/topbar_color"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:isSolid="false"
+                app:strikeWidth="4dp"
+                app:pointColor="@color/color_slect_1"
+                />
+            <RelativeLayout
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_gravity="center_vertical"
+                    android:padding="4dp"
+                    android:visibility="invisible"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:typeface="monospace"
+                    android:text="100%"/>
+                <TextView
+                    android:id="@+id/topbar_scaling"
+                    android:layout_gravity="center_vertical"
+                    android:padding="4dp"
+                    android:textColor="@android:color/black"
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:typeface="monospace"
+                    android:text="100%"/>
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/topbar_preview"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_preview"/>
+
+            <ImageView
+                android:id="@+id/topbar_first"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_first"/>
+
+            <ImageView
+                android:id="@+id/topbar_previous"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_previous"/>
+
+            <TextView
+                android:id="@+id/topbar_pages"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/topbar_next"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_next"/>
+
+            <ImageView
+                android:id="@+id/topbar_last"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_last"/>
+
+            <ImageView
+                android:id="@+id/topbar_follow"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_follow"/>
+
+            <ImageView
+                android:id="@+id/topbar_folder"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_folder"/>
+
+            <ImageView
+                android:id="@+id/topbar_share"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_share"/>
+
+            <ImageView
+                android:id="@+id/topbar_exit"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_topbar_exit"/>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_below="@+id/top_bar"
+        android:layout_alignLeft="@+id/top_bar"
+        android:layout_alignRight="@+id/top_bar"
+        android:max="100"
+        android:progress="50"
+        android:progressDrawable="@drawable/layer_list_progressbar"
+        android:visibility="gone"
+        android:id="@+id/progressBar"/>
+
+    <HorizontalScrollView
+        android:id="@+id/bottom_bar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="36dp"
+        android:layout_marginRight="36dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white_overlay">
+
+            <ImageView
+                android:id="@+id/bottombar_1"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_1"/>
+            <ImageView
+                android:id="@+id/bottombar_2"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_2"/>
+            <ImageView
+                android:id="@+id/bottombar_3"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_3"/>
+            <ImageView
+                android:id="@+id/bottombar_4"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_4"/>
+            <ImageView
+                android:id="@+id/bottombar_5"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_5"/>
+            <ImageView
+                android:id="@+id/bottombar_6"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_6"/>
+            <ImageView
+                android:id="@+id/bottombar_7"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_7"/>
+            <ImageView
+                android:id="@+id/bottombar_8"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_8"/>
+            <ImageView
+                android:id="@+id/bottombar_9"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_9"/>
+            <ImageView
+                android:id="@+id/bottombar_10"
+                android:layout_gravity="center_vertical"
+                android:padding="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_bottombar_10"/>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <ImageView
+        android:id="@+id/bottombar_icon"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:background="@mipmap/ic_bottombar_icon"/>
+
+    <LinearLayout
+        android:id="@+id/showview_group"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</RelativeLayout>
